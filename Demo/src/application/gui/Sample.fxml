@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+
+<BorderPane prefHeight="593.0" prefWidth="666.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.gui.SampleController">
+   <center>
+      <Pane fx:id="world" maxHeight="5000.0" maxWidth="5000.0" onMouseClicked="#handleOnMouseClicked" onMouseDragged="#handleOnMousePressed" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <cursor>
+            <Cursor fx:constant="CROSSHAIR" />
+         </cursor>
+         <children>
+            <StackPane />
+         </children></Pane>
+   </center>
+   <bottom>
+      <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#load" text="Punkte laden" />
+            <Button mnemonicParsing="false" onAction="#generate" text="Punkte zufällig generieren" />
+            <Button mnemonicParsing="false" text="Algorithmus starten" />
+            <Button mnemonicParsing="false" onAction="#clear" text="Alles löschen" />
+            <Button mnemonicParsing="false" onAction="#mst" text="mst" />
+
+            <Button mnemonicParsing="false" onAction="#triangulation" text="delaunay" />
+            <Button mnemonicParsing="false" onAction="#clustering" text="cluster" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" />
+         </padding>
+      </HBox>
+   </bottom>
+   <top>
+      <Label text="Graphalgorithmen" BorderPane.alignment="CENTER" />
+   </top>
+</BorderPane>

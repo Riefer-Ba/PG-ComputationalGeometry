@@ -17,19 +17,29 @@ public class DelaunayNaiv2 {
 	}
 	
 	private void init(ArrayList<Punkt> pList) {
-		for(int i=0; i < pList.size() ; i++ ) {
-			for(int j=1; j < pList.size() ; j++ ) {
-				for(int k=2; k < pList.size() ; k++ ) {
-					if(i != j && i != k && j!= k) {
-						Dreieck o = new Dreieck(pList.get(i), pList.get(j), pList.get(k));
-							if(DelaunayD.contains(o) == false) {
-										DelaunayD.add(o);	
+		if (pList.size()<3 && pList.size()>1) {
+		
+			LinienSegment l = new LinienSegment(pList.get(0), pList.get(1));
+			DelaunayK.add(l);
+			
+			
+		}
+		
+		
+			for(int i=0; i < pList.size() ; i++ ) {
+				for(int j=1; j < pList.size() ; j++ ) {
+					for(int k=2; k < pList.size() ; k++ ) {
+						if(i != j && i != k && j!= k) {
+							Dreieck o = new Dreieck(pList.get(i), pList.get(j), pList.get(k));
+								if(DelaunayD.contains(o) == false) {
+									DelaunayD.add(o);	
 
-						}				
+								}				
+						}
 					}
 				}
 			}
-		}
+		
 	}	
 	
 	public ArrayList<Dreieck> testAll(ArrayList<Punkt> p) {

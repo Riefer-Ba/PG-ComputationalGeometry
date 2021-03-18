@@ -14,6 +14,7 @@ import application.graphmodel.DelaunayNaiv2;
 import application.graphmodel.Dreieck;
 import application.graphmodel.Kmeans;
 import application.graphmodel.LinienSegment;
+import application.graphmodel.Mst_all;
 import application.graphmodel.Point;
 import application.graphmodel.Position;
 import application.graphmodel.Punkt;
@@ -54,6 +55,7 @@ public class SampleController {
 	Group delEdges = new Group();
 	Group points = new Group();
 	Group mstEdges = new Group();
+	Group globalMst = new Group();
 		
 	@FXML
 	public void initialize() {																	//initialisiert Das Feld
@@ -84,6 +86,42 @@ public class SampleController {
 		}
 		world.getChildren().add(points);
 		graphs.draw();
+	}
+	
+	@FXML
+	public void mstGlobal() {
+		world.getChildren().remove(mstEdges);
+		world.getChildren().remove(delEdges);
+		world.getChildren().remove(globalMst);
+
+		delEdges.getChildren().clear();
+		mstEdges.getChildren().clear();
+		globalMst.getChildren().clear();
+		ArrayList<Punkt> punkte = new ArrayList<Punkt>();
+		
+		for (Point p : graphs.punkte) { 
+			
+			
+			Punkt t = new Punkt(p.getX(), p.getY());
+			punkte.add(t);
+		}
+		
+		Mst_all tester = new Mst_all();
+		
+		tester.execute(punkte);
+		List <LinienSegment> mstGlobals = tester.getFinalKanten();
+		
+		for (LinienSegment l : mstGlobals) {
+			
+			Punkt x = l.getEndpkt1();
+			Punkt y = l.getEndpkt2();
+			
+			Line g = new Line(x.getX(),x.getY(), y.getX(), y.getY());
+			globalMst.getChildren().add(g);
+			
+		}
+		
+		world.getChildren().add(globalMst);
 	}
 	
 	
@@ -335,7 +373,7 @@ public class SampleController {
 		ccenters.getChildren().clear();
 		graphs.punkte.clear();
 		delEdges.getChildren().clear();
-		
+		globalMst.getChildren().clear();
 
 	}
 	

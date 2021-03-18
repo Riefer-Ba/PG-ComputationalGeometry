@@ -27,7 +27,7 @@
          <children>
             <Button mnemonicParsing="false" onAction="#load" text="Punkte laden" />
             <Button mnemonicParsing="false" onAction="#generate" text="Punkte zufällig generieren" />
-            <Button mnemonicParsing="false" text="Algorithmus starten" />
+            <Button mnemonicParsing="false" onAction="#mstGlobal" text="globalMst" />
             <Button mnemonicParsing="false" onAction="#clear" text="Alles löschen" />
             <Button mnemonicParsing="false" onAction="#mst" text="mst" />
 

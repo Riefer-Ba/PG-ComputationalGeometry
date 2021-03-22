@@ -18,6 +18,7 @@ import application.graphmodel.Mst_all;
 import application.graphmodel.Point;
 import application.graphmodel.Position;
 import application.graphmodel.Punkt;
+import application.graphmodel.TspFinder;
 import application.graphmodel.clusterCentroid;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -47,7 +48,7 @@ public class SampleController {
 	@FXML
 	Pane world;
 	
-	int k = 4;
+	
 	Builder graphs;
 	Group lines = new Group();
 	Group ccenters = new Group();
@@ -56,6 +57,7 @@ public class SampleController {
 	Group points = new Group();
 	Group mstEdges = new Group();
 	Group globalMst = new Group();
+	Group tspEdges = new Group();
 		
 	@FXML
 	public void initialize() {																	//initialisiert Das Feld
@@ -378,6 +380,57 @@ public class SampleController {
 	}
 	
 	
+	@FXML
+	public void tsp_mst() {
+		
+		world.getChildren().remove(tspEdges);
+		tspEdges.getChildren().clear();
+		List<List<Point>> cll = clustering();
+		ArrayList<ArrayList<Punkt>> cl = new ArrayList<ArrayList<Punkt>>();
+		
+		for (List<Point> cluster : cll) {								// PROVISORISCH: Pointliste -> Punktliste
+			ArrayList<Punkt> cls = new ArrayList<Punkt>();
+			for (Point p : cluster) {
+				
+				Punkt x = new Punkt(p.getX(),p.getY());
+				cls.add(x);
+			}
+		
+			cl.add(cls);
+		}
+
+		for(ArrayList<Punkt> cluster : cl) {							//für jedes cluster einzelne tsp berechnung
+			
+			
+			
+				Mst_all cluster_mst = new Mst_all();
+				cluster_mst.execute(cluster);
+				ArrayList<LinienSegment> mstKanten = cluster_mst.getFinalKanten();
+				if(mstKanten.size()>=1) {
+					
+					TspFinder tsp = new TspFinder(cluster, mstKanten);					
+
+					tsp.execute();												//tsp algo wird aufgerufen
+			
+					for(LinienSegment lin : tsp.getTspKanten()) {				//linien der tsp kanten zeichnen
+			
+						Line l = new Line(lin.getEndpkt1().getX(),lin.getEndpkt1().getY(), lin.getEndpkt2().getX(), lin.getEndpkt2().getY());
+						tspEdges.getChildren().add(l);
+						
+				
+					}
+					
+				}
+				System.out.println(mstKanten);									//nur zum debugging, kann weg
+		}
+		
+		world.getChildren().add(tspEdges);
+		
+	}
+			
+
+	
+	
 	
 	
 	
@@ -386,6 +439,7 @@ public class SampleController {
 		ccenters.getChildren().clear();
 		
 		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wählen
+		int k = Math.round(graphs.punkte.size()/3);
 		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
 		ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
 		List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
@@ -473,16 +527,32 @@ public class SampleController {
 			
 		}
 		
-		if (trigger == 4) flag = false;
+		if (trigger == Math.round(graphs.punkte.size()/3)) flag = false;
 			
 
 	}while(flag == true);
 		
 		   
 	
-		   for (Point t : clustersFinal.get(0)) {
+		   for (int i = 0; i<clustersFinal.size(); i++) {
 			   
-			   t.c.setFill(Color.RED);
+			   
+			   Circle z = new Circle(10, Color.WHITE);
+			   z.setStroke(Color.RED);
+			   z.setTranslateX(centers.get(i).getX());
+			   z.setTranslateY(centers.get(i).getY());
+			   z.setOpacity(0.3);
+			   ccenters.getChildren().add(z);
+
+		   } 
+			   
+		   world.getChildren().addAll(ccenters);
+		   return clustersFinal;   
+		   
+	}
+			   
+			   
+	/*		   t.c.setFill(Color.RED);
 			   
 			   Circle z = new Circle(10, Color.WHITE);
 			   z.setStroke(Color.RED);
@@ -531,8 +601,10 @@ public class SampleController {
 		   
 		   world.getChildren().addAll(ccenters);
 			
-		   return clustersFinal;
-		} 
+	   return clustersFinal;
+	   */	
+		
+	
 	
 //	@FXML
 	//public void slidingUp() {

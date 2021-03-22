@@ -10,6 +10,8 @@ public class Punkt{
     private double x;
     private double y;
     ArrayList <Punkt> reachable = new ArrayList<Punkt>();
+    private boolean visited;
+    private ArrayList<Punkt> nb = new ArrayList<Punkt>();
    
     public Punkt(double x, double y){
         this.x=x;
@@ -54,5 +56,29 @@ public class Punkt{
     	return reachable;
     }
     
+ 
+    public boolean getvisited() {
+    	
+    	return visited;
+    }
     
+    public void setvisited() {
+    	
+    	visited = true;
+    }
+    
+    public double getDistance (Punkt other) {
+    	
+    	return Math.sqrt(Math.pow(this.x - other.x,2) + 		//x
+				 Math.pow(this.y - other.y,2));
+    	
+    }
+
+	public ArrayList<Punkt> getNb() {
+		return nb;
+	}
+
+	public void addNb(Punkt n) {
+		this.nb.add(n);
+	}
 }

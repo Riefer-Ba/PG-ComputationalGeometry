@@ -64,7 +64,7 @@ public class SampleController {
 		
 		
 		world.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
-		world.getChildren().clear();															//löscht vorher eventuell vorhandene Punktmenge
+		world.getChildren().clear();															//lÃ¶scht vorher eventuell vorhandene Punktmenge
 		//world.setScaleX(1000);
 		//world.setScaleY(1000);
 		delEdges.setScaleX(1);
@@ -75,12 +75,12 @@ public class SampleController {
 	
 	
 	@FXML
-	public void generate() { 																	//generiert punkte zuffällig, 
+	public void generate() { 																	//generiert punkte zuffÃ¤llig, 
 		world.getChildren().clear();
 		lines.getChildren().clear();
 		points.getChildren().clear();
 		delEdges.getChildren().clear();
-		graphs.punkte.clear(); 																	//löscht vorher eventuell vorhandene Punktmenge
+		graphs.punkte.clear(); 																	//lÃ¶scht vorher eventuell vorhandene Punktmenge
 		graphs = new Builder(world, 10);
 		for (int i=0; i< graphs.punkte.size(); i++) {
 			Circle c = graphs.punkte.get(i).getC();
@@ -128,7 +128,7 @@ public class SampleController {
 	
 	
 	@FXML
-	public void undo() {																		// zuletzt hinzugefügten punkt entfernen
+	public void undo() {																		// zuletzt hinzugefÃ¼gten punkt entfernen
 		
 	
 		if (graphs.punkte.isEmpty()==false ) {
@@ -342,7 +342,7 @@ public class SampleController {
 			catch (FileNotFoundException e) {
 				
 				e.printStackTrace();
-				System.out.println("Datei nicht gefunden oder Koordinaten ungültig.");
+				System.out.println("Datei nicht gefunden oder Koordinaten ungÃ¼ltig.");
 			}
 			
 		}
@@ -351,7 +351,7 @@ public class SampleController {
 	}
 	
 	@FXML
-	public void handleOnMouseClicked(MouseEvent event) {										//einzelnen Punkt manuell einfügen am Mauscursor
+	public void handleOnMouseClicked(MouseEvent event) {										//einzelnen Punkt manuell einfÃ¼gen am Mauscursor
 
 		if (!event.isControlDown() && (!event.isAltDown())) {
 			Point p = new Point(world);
@@ -368,7 +368,7 @@ public class SampleController {
 	
 		     
 	@FXML
-	public void clear() {																		//Alle Punkte löschen, liste leeren
+	public void clear() {																		//Alle Punkte lÃ¶schen, liste leeren
 		
 		world.getChildren().clear();
 		lines.getChildren().clear();
@@ -399,7 +399,7 @@ public class SampleController {
 			cl.add(cls);
 		}
 
-		for(ArrayList<Punkt> cluster : cl) {							//für jedes cluster einzelne tsp berechnung
+		for(ArrayList<Punkt> cluster : cl) {							//fÃ¼r jedes cluster einzelne tsp berechnung
 			
 			
 			
@@ -434,12 +434,11 @@ public class SampleController {
 	
 	
 	
-	public List<List<Point>> clustering() {
+		public List<List<Point>> clustering() {
 		world.getChildren().remove(ccenters);
 		ccenters.getChildren().clear();
 		
-		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wählen
-		int k = Math.round(graphs.punkte.size()/3);
+		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wÃ¤hlen
 		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
 		ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
 		List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
@@ -458,7 +457,13 @@ public class SampleController {
 			
 		}																							// Initialisierung der Clusterzentren
 		
-		for (int i = 0; i<k;i++) {
+		for (int i = 0; i<k;i++) {	// Zuweisungen und k Ã¤ndern 
+			
+			
+			if (k == 0) { //fÃ¼rs erste, wenn random gewollt einfach Auskommentieren, ist eine gui erweiterung 
+				//mÃ¶glich? als switch case?
+				
+				//der erste ist immer noch zufÃ¤llig!
 			
 			List<Point> clusterList = new ArrayList<>();
 			clustersFinal.add(clusterList);
@@ -467,7 +472,13 @@ public class SampleController {
 			double yCord = (Math.random() * (maxY-minY)) + minY;
 			
 			centers.add( new clusterCentroid(xCord, yCord));
-
+			}
+			
+			else {
+				double[] cord  = neuerCentroid(graphs.punkte, centers);
+				
+				centers.add(new clusterCentroid(cord[0], cord[1]));
+			}
 			
 		}
 
@@ -483,7 +494,7 @@ public class SampleController {
 			clustersFinal.add(clusterList);
 		}
 			
-			for (Point p : graphs.punkte) {										//für alle punkte die minimale Distanz zum aktuellen Zentrum berechnen
+			for (Point p : graphs.punkte) {										//fÃ¼r alle punkte die minimale Distanz zum aktuellen Zentrum berechnen
 			
 				int cl = 0;
 				double minDist = centers.get(0).distance(p); 
@@ -527,32 +538,16 @@ public class SampleController {
 			
 		}
 		
-		if (trigger == Math.round(graphs.punkte.size()/3)) flag = false;
+		if (trigger == 4) flag = false;
 			
 
 	}while(flag == true);
 		
 		   
 	
-		   for (int i = 0; i<clustersFinal.size(); i++) {
+		   for (Point t : clustersFinal.get(0)) {
 			   
-			   
-			   Circle z = new Circle(10, Color.WHITE);
-			   z.setStroke(Color.RED);
-			   z.setTranslateX(centers.get(i).getX());
-			   z.setTranslateY(centers.get(i).getY());
-			   z.setOpacity(0.3);
-			   ccenters.getChildren().add(z);
-
-		   } 
-			   
-		   world.getChildren().addAll(ccenters);
-		   return clustersFinal;   
-		   
-	}
-			   
-			   
-	/*		   t.c.setFill(Color.RED);
+			   t.c.setFill(Color.RED);
 			   
 			   Circle z = new Circle(10, Color.WHITE);
 			   z.setStroke(Color.RED);
@@ -601,8 +596,37 @@ public class SampleController {
 		   
 		   world.getChildren().addAll(ccenters);
 			
-	   return clustersFinal;
-	   */	
+		   return clustersFinal;
+		} 
+	
+	//used for k-means++ finden vom 2+-ten Cluster, Wahrscheinlichkeitsbasiert.
+	private double[] neuerCentroid(ArrayList<Point> punkte, ArrayList<clusterCentroid> centers) {
+		double[] cord = {0,0};
+		double minDist = 10000;
+		ArrayList<Double> DistArray = new ArrayList<Double>();
+		ArrayList<Double> DuplikatedDist = new ArrayList<Double>();
+		
+		for(int i=0; i< punkte.size(); i++) {
+			for(int k=0; k< centers.size(); k++) {
+				double temp = Math.pow(centers.get(k).distance(punkte.get(i)), 2);
+				if(temp < minDist) minDist=temp; 
+			}
+			DistArray.add(minDist);
+			
+			double repeat = DistArray.get(i)/50.0;	//D^2 fÃ¼r alle 50 Einheiten einmal einfÃ¼gen
+			for(int k=0; k < repeat ; k++) {			//auf grÃ¶ÃŸe anpassen!!!!!
+				DuplikatedDist.add(DistArray.get(i));
+			}
+		}
+		
+		Random rnd = new Random();
+		double r = DuplikatedDist.get(rnd.nextInt(DuplikatedDist.size()));
+		
+		cord[0]=punkte.get(DistArray.indexOf(r)).getX();
+		cord[1]=punkte.get(DistArray.indexOf(r)).getX();
+		
+		return cord;
+	}
 		
 	
 	

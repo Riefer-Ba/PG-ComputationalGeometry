@@ -46,7 +46,7 @@ public class ClusterMerge {
 
 
 	private int[] ConnectsTwoClusters(List<List<Punkt>> clusters, LinienSegment ls) {
-		//Test ob die beiden Endpkte NICHT dem selben Cluster gehören
+		//Test ob die beiden Endpkte NICHT dem selben Cluster gehï¿½ren
 		//1.Cluster finden
 		int a[]= {0,0,0}; 
 		for( int i =0 ; i < clusters.size(); i++) {
@@ -281,6 +281,7 @@ private LinienSegment kreuzungsfrei(LinienSegment c1, LinienSegment c2, LinienSe
 			FinalTsp.get(i).printLs();
 		}
 	}
+
 	
 	public ArrayList<LinienSegment> getTsp(){
 		

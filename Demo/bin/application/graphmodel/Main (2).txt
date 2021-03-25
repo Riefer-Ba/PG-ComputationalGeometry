@@ -1,0 +1,71 @@
+public class Main {
+	
+	public static void main(String[] args) {
+        ArrayList<Punkt> pList= Punkt.lesen("Beispiel1(7).txt");
+		
+		List<LinkedList<Punkt>> tsp = new ArrayList<LinkedList<Punkt>>();
+		LinkedList<Punkt> connected = new LinkedList<Punkt>();
+		LinkedList<Punkt> connected2 = new LinkedList<Punkt>();
+		//
+		ClusterMerge comb = new ClusterMerge();
+		//
+		List<List<Punkt>> clusters = new ArrayList<List<Punkt>>();
+		ArrayList<Punkt> list1= new ArrayList<Punkt>();
+		ArrayList<Punkt> list2= new ArrayList<Punkt>();
+		//
+		ArrayList<LinienSegment> mst = new ArrayList<LinienSegment>();
+		//
+		
+		list1.add(pList.get(0));
+		list1.add(pList.get(1));
+		list1.add(pList.get(2));
+		
+		list2.add(pList.get(3));
+		list2.add(pList.get(4));
+		list2.add(pList.get(6));
+		//
+		
+		clusters.add(list1);
+		clusters.add(list2);
+		
+		//
+		
+		
+		LinienSegment l2 = new LinienSegment(pList.get(0), pList.get(1));
+		LinienSegment l1 = new LinienSegment(pList.get(1), pList.get(4));
+		
+		//
+		
+		mst.add(l2);
+		mst.add(l1);
+		
+		//
+		
+		connected.add(pList.get(0));
+		connected.add(pList.get(1));	
+		connected.add(pList.get(2));
+		
+		connected2.add(pList.get(3));
+		connected2.add(pList.get(4));
+		connected2.add(pList.get(6));
+		//
+		
+		tsp.add(connected);
+		tsp.add(connected2);
+		//
+		
+		System.out.println(tsp.get(0).listIterator(1).hasNext());
+		
+		try {
+		connected.listIterator(0).previous().printPunkt();
+		}
+		catch(NoSuchElementException e) {
+			for (int k=0 ; k < connected.size() - 0 ; k++) {
+				connected.listIterator(connected.size() - k).previous().printPunkt();
+				//connected.listIterator(0 + k).next().printPunkt(); für anderen Fall.
+			}
+		}
+
+		comb.execute(clusters, mst, tsp);
+
+}

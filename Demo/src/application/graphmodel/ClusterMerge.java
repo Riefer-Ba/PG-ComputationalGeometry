@@ -5,6 +5,7 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 public class ClusterMerge {
+	ArrayList<LinienSegment> FinalTsp = new ArrayList<LinienSegment>();
 
 	public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, List<LinkedList<Punkt>> tsp) {
 		mst.get(0).SortMstLaenge(mst);
@@ -14,11 +15,9 @@ public class ClusterMerge {
 		//verbindet Cluster, behaltet Tsp Eigenschaften bei.
 		}
 		
-		System.out.println("final tsp printing @@@@@@");
-		for (int i=0; i< tsp.get(0).size(); i++) {
-			tsp.get(0).get(i).printPunkt();
-		}
+		FinalTsp(tsp);
 	}
+
 
 
 	public LinienSegment findClosestCluster(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, List<LinkedList<Punkt>> tsp) {
@@ -31,8 +30,9 @@ public class ClusterMerge {
 				ConnectingMstEdge = mst.get(i);
 				break;
 			}
+			if( a[0] == 1 && i == mst.size()-1) System.out.println("ups");
 		}
-		
+				
 		ConnectTsp(ConnectingMstEdge,a[1] , a[2], tsp);
 		ClusterCombine(a[1] , a[2] , clusters);
 //		LinienSegment bestEdge = ConnectEdge(ConnectingMstEdge, a[1], a[2], tsp);	
@@ -52,14 +52,13 @@ public class ClusterMerge {
 				if (clusters.get(i).contains(ls.endpkt2) == true) {
 					return a;
 				}
-				else {
-					//2. Cluster finden
-					for( int j =0 ; j < clusters.size(); j++) {
-						if(i != j) {
-							if (clusters.get(j).contains(ls.endpkt2) == true) {
-								a[0] =1; a[1] = i; a[2] =j;
-								return a;
-							}
+			else
+			//2. Cluster finden
+			for( int j =0 ; j < clusters.size(); j++) {
+				if(i != j) {
+					if (clusters.get(j).contains(ls.endpkt2) == true) {
+						a[0] =1; a[1] = i; a[2] =j;
+						return a;
 						}
 					}
 				}
@@ -70,8 +69,8 @@ public class ClusterMerge {
 	
 	private LinienSegment ConnectTsp(LinienSegment mstEdge, int i, int j, List<LinkedList<Punkt>> tsp) {
 		LinienSegment bestEdge;
-	//ArrayList<LinienSegment> candidate = new ArrayList<LinienSegment>();
-//		ListIterator<LinkedList<Punkt>> iterator = tsp.listIterator(); 
+		int provisorischeLoesung =0;
+		double g0,g1;
 		
 		LinkedList<Punkt> temp= new LinkedList<Punkt>();
 		
@@ -84,6 +83,7 @@ public class ClusterMerge {
 			System.out.println("b: "+b);
 			a = tsp.get(j).indexOf(mstEdge.endpkt1);
 			b = tsp.get(i).indexOf(mstEdge.endpkt2);
+			provisorischeLoesung =1;
 		}
 		
 		int w= a+1; int x= a-1; int y= b+1 ; int z= b-1;
@@ -120,26 +120,36 @@ public class ClusterMerge {
 		
 
 		
-		LinienSegment c[] = candidate(i,j,w,x,y,z,tsp, mstEdge); //ist nicht kreuzungsfrei
+		LinienSegment c[] = candidate(i,j,w,x,y,z,tsp, mstEdge); 
 		LinienSegment c11 = c[0];
 		LinienSegment c22 = c[1];
 		
-		LinienSegment m11 = new LinienSegment(mstEdge.endpkt1, tsp.get(i).get(w));
-		LinienSegment m12 = new LinienSegment(mstEdge.endpkt1, tsp.get(i).get(x));
-		LinienSegment m21 = new LinienSegment(mstEdge.endpkt2, tsp.get(j).get(y));
-		LinienSegment m22 = new LinienSegment(mstEdge.endpkt2, tsp.get(j).get(z));
-		
-		double g0= Math.pow(c11.gewicht - m11.gewicht - m21.gewicht, 2);
-		double g1= Math.pow(c22.gewicht - m12.gewicht - m22.gewicht, 2);
-		
-		
+		if(provisorischeLoesung ==0 ) {
+			LinienSegment m11 = new LinienSegment(mstEdge.endpkt1, tsp.get(i).get(w));
+			LinienSegment m12 = new LinienSegment(mstEdge.endpkt1, tsp.get(i).get(x));
+			LinienSegment m21 = new LinienSegment(mstEdge.endpkt2, tsp.get(j).get(y));
+			LinienSegment m22 = new LinienSegment(mstEdge.endpkt2, tsp.get(j).get(z));
+	
+			g0= c11.gewicht - m12.gewicht - m21.gewicht;
+			g1= c22.gewicht - m11.gewicht - m22.gewicht;
+		}
+		else {
+			LinienSegment m11 = new LinienSegment(mstEdge.endpkt1, tsp.get(j).get(y));
+			LinienSegment m12 = new LinienSegment(mstEdge.endpkt1, tsp.get(j).get(z));
+			LinienSegment m21 = new LinienSegment(mstEdge.endpkt2, tsp.get(i).get(w));
+			LinienSegment m22 = new LinienSegment(mstEdge.endpkt2, tsp.get(i).get(x));
+			
+			g0= c11.gewicht - m11.gewicht - m22.gewicht;
+			g1= c22.gewicht - m12.gewicht - m21.gewicht;
+		}
+
 		if( g0 < g1) {
 			bestEdge = c11;
 			int count=0;
-			
+			System.out.println(provisorischeLoesung == 1);
 			for (int p=0; p < tsp.get(j).size() ; p++) {
 				try {
-					temp.add(tsp.get(j).get(b + p));
+					temp.add(tsp.get(j).get(b - p));
 				}
 				catch(IndexOutOfBoundsException e) {	//NoSuchElementException
 					temp.add(tsp.get(j).get(count));
@@ -159,6 +169,8 @@ public class ClusterMerge {
 			}
 		}
 		else {
+			System.out.println(provisorischeLoesung == 0);
+			System.out.println("we are here this should work");
 			bestEdge = c22;
 			int count=0;
 			
@@ -194,7 +206,11 @@ public class ClusterMerge {
 		
 		tsp.add(temp);
 		
+		
+		
+		System.out.println("connecting through:");
 		bestEdge.printLs();
+		
 		
 		return bestEdge;
 	}
@@ -249,5 +265,20 @@ private LinienSegment kreuzungsfrei(LinienSegment c1, LinienSegment c2, LinienSe
 		clusters.get(i).addAll(clusters.get(j));
 		clusters.remove(j);
 	}
+	
+
+	private void FinalTsp(List<LinkedList<Punkt>> tsp) {
+		for (int i=0; i< tsp.get(0).size() -1; i++) {
+			FinalTsp.add(new LinienSegment(tsp.get(0).get(i), tsp.get(0).get(i+1)));
+		}
+		
+		FinalTsp.add(new LinienSegment(tsp.get(0).get(tsp.get(0).size()-1),tsp.get(0).get(0)));
+		
+		System.out.println("final tsp printing @@@@@@");
+		for (int i=0; i< FinalTsp.size(); i++) {
+			FinalTsp.get(i).printLs();
+		}
+	}
+
 
 }

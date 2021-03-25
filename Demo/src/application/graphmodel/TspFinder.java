@@ -128,6 +128,11 @@ public class TspFinder {
 		
 		return tspK;
 	}
+	
+	public LinkedList<Punkt> getLL(){
+		
+		return pts;
+	}
 }
 	
 	

@@ -1,3 +1,5 @@
+package application.graphmodel;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class ClusterMerge {
 
 
 	private int[] ConnectsTwoClusters(List<List<Punkt>> clusters, LinienSegment ls) {
-		//Test ob die beiden Endpkte NICHT dem selben Cluster gehören
+		//Test ob die beiden Endpkte NICHT dem selben Cluster geh�ren
 		//1.Cluster finden
 		int a[]= {0,0,0}; 
 		for( int i =0 ; i < clusters.size(); i++) {
@@ -278,6 +280,13 @@ private LinienSegment kreuzungsfrei(LinienSegment c1, LinienSegment c2, LinienSe
 		for (int i=0; i< FinalTsp.size(); i++) {
 			FinalTsp.get(i).printLs();
 		}
+	}
+
+	
+	public ArrayList<LinienSegment> getTsp(){
+		
+		
+		return FinalTsp;
 	}
 
 

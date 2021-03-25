@@ -4,12 +4,14 @@
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
 import application.graphmodel.Builder;
+import application.graphmodel.ClusterMerge;
 import application.graphmodel.DelaunayNaiv2;
 import application.graphmodel.Dreieck;
 import application.graphmodel.Kmeans;
@@ -58,6 +60,7 @@ public class SampleController {
 	Group mstEdges = new Group();
 	Group globalMst = new Group();
 	Group tspEdges = new Group();
+	Group finalTsp = new Group();
 		
 	@FXML
 	public void initialize() {																	//initialisiert Das Feld
@@ -91,7 +94,44 @@ public class SampleController {
 	}
 	
 	@FXML
-	public void mstGlobal() {
+	public void finalAlgo() {
+		world.getChildren().remove(tspEdges);
+		tspEdges.getChildren().clear();
+		world.getChildren().remove(finalTsp);
+		finalTsp.getChildren().clear();
+		ArrayList<LinienSegment> mst = mstGlobal();
+		List<LinkedList<Punkt>> tsps = tsp_mst();
+		List<List<Point>> cl = clustering();
+		List<List<Punkt>> clusters = new ArrayList<List<Punkt>>();
+		
+		for (List<Point> cluster : cl) {								// PROVISORISCH: Pointliste -> Punktliste
+			ArrayList<Punkt> cls = new ArrayList<Punkt>();
+			for (Point p : cluster) {
+				
+				Punkt x = new Punkt(p.getX(),p.getY());
+				cls.add(x);
+			}
+		
+			clusters.add(cls);
+		}
+		
+		
+		ClusterMerge finalStep = new ClusterMerge();
+		
+		finalStep.execute(clusters, mst, tsps);
+		
+		for (LinienSegment line : finalStep.getTsp()) {
+			
+			Line l = new Line(line.getEndpkt1().getX(), line.getEndpkt1().getY(), line.getEndpkt2().getX(), line.getEndpkt2().getY());
+			finalTsp.getChildren().add(l);
+			
+		}
+		
+		world.getChildren().add(finalTsp);
+	}
+	
+	@FXML
+	public ArrayList<LinienSegment> mstGlobal() {
 		world.getChildren().remove(mstEdges);
 		world.getChildren().remove(delEdges);
 		world.getChildren().remove(globalMst);
@@ -111,7 +151,7 @@ public class SampleController {
 		Mst_all tester = new Mst_all();
 		
 		tester.execute(punkte);
-		List <LinienSegment> mstGlobals = tester.getFinalKanten();
+		ArrayList <LinienSegment> mstGlobals = tester.getFinalKanten();
 		
 		for (LinienSegment l : mstGlobals) {
 			
@@ -124,6 +164,7 @@ public class SampleController {
 		}
 		
 		world.getChildren().add(globalMst);
+		return mstGlobals;
 	}
 	
 	
@@ -381,12 +422,13 @@ public class SampleController {
 	
 	
 	@FXML
-	public void tsp_mst() {
+	public List<LinkedList<Punkt>> tsp_mst() {
 		
 		world.getChildren().remove(tspEdges);
 		tspEdges.getChildren().clear();
 		List<List<Point>> cll = clustering();
 		ArrayList<ArrayList<Punkt>> cl = new ArrayList<ArrayList<Punkt>>();
+		List<LinkedList<Punkt>> tspClusters = new ArrayList<LinkedList<Punkt>>();
 		
 		for (List<Point> cluster : cll) {								// PROVISORISCH: Pointliste -> Punktliste
 			ArrayList<Punkt> cls = new ArrayList<Punkt>();
@@ -411,7 +453,8 @@ public class SampleController {
 					TspFinder tsp = new TspFinder(cluster, mstKanten);					
 
 					tsp.execute();												//tsp algo wird aufgerufen
-			
+					tspClusters.add(tsp.getLL());
+					
 					for(LinienSegment lin : tsp.getTspKanten()) {				//linien der tsp kanten zeichnen
 			
 						Line l = new Line(lin.getEndpkt1().getX(),lin.getEndpkt1().getY(), lin.getEndpkt2().getX(), lin.getEndpkt2().getY());
@@ -425,7 +468,7 @@ public class SampleController {
 		}
 		
 		world.getChildren().add(tspEdges);
-		
+		return tspClusters;
 	}
 			
 
@@ -439,6 +482,7 @@ public class SampleController {
 		ccenters.getChildren().clear();
 		
 		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wählen
+		int k = 4;
 		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
 		ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
 		List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
@@ -538,7 +582,7 @@ public class SampleController {
 			
 		}
 		
-		if (trigger == 4) flag = false;
+		if (trigger == k) flag = false;
 			
 
 	}while(flag == true);

@@ -1,5 +1,6 @@
 package application.graphmodel;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 public class LinienSegment implements Comparable<LinienSegment>{
@@ -119,6 +120,26 @@ public class LinienSegment implements Comparable<LinienSegment>{
 		mst.set(i, temp);
 	}
 
+	public void SortMstLaenge(ArrayList<LinienSegment> mst) {
+		int minPos;
+		int einf =0;
+		do{
+			minPos = einf;
+			for (int i= einf ; i< mst.size() ; i++) {
+				if( mst.get(i).gewicht < mst.get(minPos).gewicht) {
+					minPos = i;
+				}
+			}
+			swap(mst, minPos, einf);
+			einf ++;
+		} while (einf < mst.size());
+	}
+
+	public void swap(ArrayList<LinienSegment> mst, int i, int j) {
+		LinienSegment temp = mst.get(j);
+		mst.set(j, mst.get(i));
+		mst.set(i, temp);
+	}
 
 
 	

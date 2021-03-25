@@ -22,10 +22,13 @@ import application.graphmodel.Position;
 import application.graphmodel.Punkt;
 import application.graphmodel.TspFinder;
 import application.graphmodel.clusterCentroid;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tooltip;
@@ -49,7 +52,7 @@ public class SampleController {
 	
 	@FXML
 	Pane world;
-	
+	ObservableList<String> choiceBoxAlgo = FXCollections.observableArrayList("K++ means", "random k means");
 	
 	Builder graphs;
 	Group lines = new Group();
@@ -61,7 +64,7 @@ public class SampleController {
 	Group globalMst = new Group();
 	Group tspEdges = new Group();
 	Group finalTsp = new Group();
-		
+	public int test = 10;
 	@FXML
 	public void initialize() {																	//initialisiert Das Feld
 		
@@ -73,7 +76,8 @@ public class SampleController {
 		delEdges.setScaleX(1);
 		delEdges.setScaleX(1);
 		graphs = new Builder(world, 0);
-		
+		choicebox.setValue("Clustering:");
+		choicebox.setItems(choiceBoxAlgo);
 	}
 	
 	
@@ -91,6 +95,19 @@ public class SampleController {
 		}
 		world.getChildren().add(points);
 		graphs.draw();
+		
+		if(choicebox.getValue() == "K++ means") {
+			
+			test = 500;
+			System.out.println(test);
+			
+		}
+		
+		else if(choicebox.getValue() == "random k means") {
+			
+			test = 2;
+			System.out.println(test);
+		}
 	}
 	
 	@FXML
@@ -103,6 +120,11 @@ public class SampleController {
 		List<LinkedList<Punkt>> tsps = tsp_mst();
 		List<List<Point>> cl = clustering();
 		List<List<Punkt>> clusters = new ArrayList<List<Punkt>>();
+		
+		//world.getChildren().remove(tspEdges);
+		//tspEdges.getChildren().clear();
+		//world.getChildren().remove(finalTsp);
+		//finalTsp.getChildren().clear();
 		
 		for (List<Point> cluster : cl) {								// PROVISORISCH: Pointliste -> Punktliste
 			ArrayList<Punkt> cls = new ArrayList<Punkt>();
@@ -289,6 +311,14 @@ public class SampleController {
 	}
 				
 	
+	@FXML 
+	private ChoiceBox choicebox;
+
+	@FXML
+	private void init() {
+		choicebox.setValue("unsure" );
+		
+	}
 	
 	
 	@FXML
@@ -425,6 +455,8 @@ public class SampleController {
 	public List<LinkedList<Punkt>> tsp_mst() {
 		
 		world.getChildren().remove(tspEdges);
+		world.getChildren().remove(mstEdges);
+		mstEdges.getChildren().clear();
 		tspEdges.getChildren().clear();
 		List<List<Point>> cll = clustering();
 		ArrayList<ArrayList<Punkt>> cl = new ArrayList<ArrayList<Punkt>>();

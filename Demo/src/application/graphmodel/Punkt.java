@@ -3,6 +3,7 @@ package application.graphmodel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -80,5 +81,17 @@ public class Punkt{
 
 	public void addNb(Punkt n) {
 		this.nb.add(n);
+	}
+	
+	public boolean inCluster(List<Punkt> clusters) {
+		for(int i =0 ; i< clusters.size(); i++) {
+			if (clusters.get(i).getX() == this.getX()) {
+				if (clusters.get(i).getY() == this.getY()) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 }

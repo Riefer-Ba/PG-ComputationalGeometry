@@ -4,14 +4,17 @@
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
+
 import application.graphmodel.Builder;
 import application.graphmodel.ClusterMerge;
+import application.graphmodel.ClusteringRandomKmeans;
 import application.graphmodel.DelaunayNaiv2;
 import application.graphmodel.Dreieck;
 import application.graphmodel.Kmeans;
@@ -65,6 +68,7 @@ public class SampleController {
 	Group tspEdges = new Group();
 	Group finalTsp = new Group();
 	public int test = 10;
+	List<List<Point>> globalCluster = new ArrayList<List<Point>>();
 	@FXML
 	public void initialize() {																	//initialisiert Das Feld
 		
@@ -78,6 +82,7 @@ public class SampleController {
 		graphs = new Builder(world, 0);
 		choicebox.setValue("Clustering:");
 		choicebox.setItems(choiceBoxAlgo);
+		//clustering();
 	}
 	
 	
@@ -118,7 +123,7 @@ public class SampleController {
 		finalTsp.getChildren().clear();
 		ArrayList<LinienSegment> mst = mstGlobal();
 		List<LinkedList<Punkt>> tsps = tsp_mst();
-		List<List<Point>> cl = clustering();
+		List<List<Point>> cl = globalCluster;
 		List<List<Punkt>> clusters = new ArrayList<List<Punkt>>();
 		
 		//world.getChildren().remove(tspEdges);
@@ -214,7 +219,7 @@ public class SampleController {
 		world.getChildren().remove(delEdges);
 		delEdges.getChildren().clear();
 		mstEdges.getChildren().clear();
-		List<List<Point>> clusters = clustering();
+		List<List<Point>> clusters = globalCluster;
 		List<List<LinienSegment>> triKanten = triangulation();
 		delEdges.getChildren().clear();
 		
@@ -458,7 +463,7 @@ public class SampleController {
 		world.getChildren().remove(mstEdges);
 		mstEdges.getChildren().clear();
 		tspEdges.getChildren().clear();
-		List<List<Point>> cll = clustering();
+		List<List<Point>> cll = globalCluster;
 		ArrayList<ArrayList<Punkt>> cl = new ArrayList<ArrayList<Punkt>>();
 		List<LinkedList<Punkt>> tspClusters = new ArrayList<LinkedList<Punkt>>();
 		
@@ -480,7 +485,7 @@ public class SampleController {
 				Mst_all cluster_mst = new Mst_all();
 				cluster_mst.execute(cluster);
 				ArrayList<LinienSegment> mstKanten = cluster_mst.getFinalKanten();
-				if(mstKanten.size()>=1) {
+				if(mstKanten.size()>0) {
 					
 					TspFinder tsp = new TspFinder(cluster, mstKanten);					
 
@@ -494,6 +499,14 @@ public class SampleController {
 						
 				
 					}
+					
+				}
+				else if (mstKanten.size() == 0 ) {
+					
+						LinkedList<Punkt> einzelPunkt = new LinkedList<Punkt>();
+						einzelPunkt.add(cluster.get(0));
+						tspClusters.add(einzelPunkt);
+					
 					
 				}
 				System.out.println(mstKanten);									//nur zum debugging, kann weg
@@ -513,6 +526,8 @@ public class SampleController {
 		world.getChildren().remove(ccenters);
 		ccenters.getChildren().clear();
 		
+		
+		/*
 		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wählen
 		int k = 4;
 		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
@@ -619,8 +634,11 @@ public class SampleController {
 
 	}while(flag == true);
 		
-		   
-	
+
+
+		    
+		        
+		    
 		   for (Point t : clustersFinal.get(0)) {
 			   
 			   t.c.setFill(Color.RED);
@@ -669,10 +687,30 @@ public class SampleController {
 			   z.setOpacity(0.3);
 			   ccenters.getChildren().add(z);
 		   }
-		   
-		   world.getChildren().addAll(ccenters);
+	
+			Iterator <List<Point>> iterator = clustersFinal.iterator();
 			
-		   return clustersFinal;
+			while (iterator.hasNext()) {
+				
+				List<Point> vgl = iterator.next();
+				if (iterator.next().isEmpty()) {
+					iterator.remove();;
+				}
+				
+			}
+		   
+		//	if(clustersFinal.get(0).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(0));}
+		//	if(clustersFinal.get(1).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(1));}
+		//	if(clustersFinal.get(2).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(2));}
+		//	if(clustersFinal.get(3).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(3));}
+		*/
+		
+		ClusteringRandomKmeans cl = new ClusteringRandomKmeans(graphs.punkte);
+		cl.execute();
+		globalCluster = cl.getClusters();
+		  // world.getChildren().addAll(ccenters);
+			
+		   return globalCluster;
 		} 
 	
 	//used for k-means++ finden vom 2+-ten Cluster, Wahrscheinlichkeitsbasiert.
@@ -728,7 +766,7 @@ public class SampleController {
 		world.getChildren().remove(delEdges);
 		List<List<LinienSegment>> triKanten = new ArrayList<List<LinienSegment>>();
 		
-		List<List<Point>> cl = clustering();
+		List<List<Point>> cl = globalCluster;
 		for (int z = 0; z<cl.size(); z++) {
 			
 			

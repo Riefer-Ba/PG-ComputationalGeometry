@@ -130,7 +130,10 @@ public class SampleController {
 		//tspEdges.getChildren().clear();
 		//world.getChildren().remove(finalTsp);
 		//finalTsp.getChildren().clear();
-		
+		world.getChildren().remove(tspEdges);
+		tspEdges.getChildren().clear();
+		world.getChildren().remove(globalMst);
+		globalMst.getChildren().clear();
 		for (List<Point> cluster : cl) {								// PROVISORISCH: Pointliste -> Punktliste
 			ArrayList<Punkt> cls = new ArrayList<Punkt>();
 			for (Point p : cluster) {
@@ -462,7 +465,11 @@ public class SampleController {
 		world.getChildren().remove(tspEdges);
 		world.getChildren().remove(mstEdges);
 		mstEdges.getChildren().clear();
+		world.getChildren().remove(finalTsp);
+		finalTsp.getChildren().clear();
 		tspEdges.getChildren().clear();
+		delEdges.getChildren().clear();
+		world.getChildren().remove(delEdges);
 		List<List<Point>> cll = globalCluster;
 		ArrayList<ArrayList<Punkt>> cl = new ArrayList<ArrayList<Punkt>>();
 		List<LinkedList<Punkt>> tspClusters = new ArrayList<LinkedList<Punkt>>();
@@ -762,6 +769,12 @@ public class SampleController {
 		
 	
 	public List<List<LinienSegment>> triangulation() {
+		world.getChildren().remove(tspEdges);
+		world.getChildren().remove(mstEdges);
+		mstEdges.getChildren().clear();
+		world.getChildren().remove(finalTsp);
+		finalTsp.getChildren().clear();
+		tspEdges.getChildren().clear();
 		delEdges.getChildren().clear();
 		world.getChildren().remove(delEdges);
 		List<List<LinienSegment>> triKanten = new ArrayList<List<LinienSegment>>();

@@ -205,11 +205,21 @@ public class SampleController {
 		if (graphs.punkte.isEmpty()==false ) {
 			world.getChildren().remove(graphs.punkte.size()-1);
 			graphs.punkte.remove(graphs.punkte.size()-1);
-			lines.getChildren().clear();
-			edges.clear();
-			ccenters.getChildren().clear();
-			graphs.draw();
+			//ccenters.getChildren().clear();
 			
+
+			world.getChildren().remove(mstEdges);
+			world.getChildren().remove(globalMst);
+			world.getChildren().remove(tspEdges);
+			world.getChildren().remove(finalTsp);
+			world.getChildren().remove(delEdges);
+
+			mstEdges.getChildren().clear();
+			globalMst.getChildren().clear();
+			tspEdges.getChildren().clear();
+			finalTsp.getChildren().clear();
+			delEdges.getChildren().clear();
+			graphs.draw();
 		}
 		
 		
@@ -322,11 +332,6 @@ public class SampleController {
 	@FXML 
 	private ChoiceBox choicebox;
 
-	@FXML
-	private void init() {
-		choicebox.setValue("unsure" );
-		
-	}
 	
 	
 	@FXML
@@ -749,25 +754,7 @@ public class SampleController {
 		return cord;
 	}
 		
-	
-	
-//	@FXML
-	//public void slidingUp() {
-
-	//	world.setScaleX(world.getScaleX()+10);
-	//	world.setScaleY(world.getScaleY()+10);
-
-	//}
-	
-	//@FXML
-	//public void slindingDown() {
-		
-	//	world.setScaleX(world.getScaleX()-10);
-	//	world.setScaleY(world.getScaleY()-10);
-
-	//}
-		
-	
+	@FXML
 	public List<List<LinienSegment>> triangulation() {
 		world.getChildren().remove(tspEdges);
 		world.getChildren().remove(mstEdges);
@@ -830,37 +817,9 @@ public class SampleController {
 	}
 
 	
-	@FXML public void zoom(MouseEvent event) {
-		final double SCALE_DELTA = 1.1;
+	
 		
-		Group g = new Group();
-		
-		for (Point p : graphs.punkte) {
-			
-			g.getChildren().add(p.c);
-		}
-		
-		world.getChildren().add(g);
-		world.setOnScroll(new EventHandler<ScrollEvent>() {
-			
-		  @Override public void handle(ScrollEvent event) {
-		    event.consume();
-
-		    if (event.getDeltaY() == 0) {
-		      return;
-		    }
-
-		    double scaleFactor =
-		      (event.getDeltaY() > 0)
-		        ? SCALE_DELTA
-		        : 1/SCALE_DELTA;
-
-		    g.setScaleX(g.getScaleX() * scaleFactor);
-		    g.setScaleY(g.getScaleY() * scaleFactor);
-		  }
-		});
-		
-	}
+	
 		
 }
 	

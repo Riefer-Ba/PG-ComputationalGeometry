@@ -36,6 +36,7 @@
             <Button mnemonicParsing="false" onAction="#clustering" text="cluster" />
             <Button mnemonicParsing="false" onAction="#finalAlgo" text="Final Algo" />
             <ChoiceBox fx:id="choicebox" prefHeight="25.0" prefWidth="115.0" />
+            <Button mnemonicParsing="false" onAction="#undo" text="undo" />
          </children>
          <padding>
             <Insets bottom="10.0" />

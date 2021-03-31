@@ -7,16 +7,15 @@ import java.util.List;
 public class ClusteringRandomKmeans {
 
 	
-	ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
-	ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
-	ArrayList<Point> punkte = new ArrayList<Point>();
+
+	List<Point> punkte = new ArrayList<Point>();
 	List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
 	int k = Math.round(punkte.size()/4);
-	
+	 
 							
 	
 	
-	public ClusteringRandomKmeans(ArrayList<Point> pts) {
+	public ClusteringRandomKmeans(List<Point> pts) {
 		
 		this.punkte = pts;
 		
@@ -25,21 +24,26 @@ public class ClusteringRandomKmeans {
 	
 	public void execute() {
 		
-		createKmeans();
+		createKmeans(punkte, k);
+		rec(clustersFinal);
 		
 	}
 	
-	public void createKmeans() {
+	public void createKmeans(List<Point> punkteT, int centerCount) {
 		
-		if(k<4) {k = 4;}
+		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
+		ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
+		
+		if(centerCount>4) {centerCount = 4;}
+		if(centerCount < 2) {centerCount = 2;}
 
 		boolean flag = true;
-		double maxX = 0;																			
-		double minX = punkte.get(0).getX();													
+		double maxX = 0;																		
+		double minX = punkteT.get(0).getX();													
 		double maxY = 0;																			
-		double minY = punkte.get(0).getY();	
+		double minY = punkteT.get(0).getY();	
 		
-		for (Point p : punkte) {																
+		for (Point p : punkteT) {																
 			
 			if (maxX < p.getX() ) {maxX = p.getX();}
 			if (minX > p.getX() ) {minX = p.getX();}
@@ -48,7 +52,7 @@ public class ClusteringRandomKmeans {
 			
 		}				
 		
-		for (int i = 0; i<k;i++) {	
+		for (int i = 0; i<centerCount;i++) {	
 			
 			List<Point> clusterList = new ArrayList<>();
 			clustersFinal.add(clusterList);
@@ -66,13 +70,13 @@ public class ClusteringRandomKmeans {
 			clustersFinal.clear();
 			centersTemp.clear();
 			
-			for (int i = 0; i<k;i++) {
+			for (int i = 0; i<centerCount;i++) {
 				
 				List<Point> clusterList = new ArrayList<>();
 				clustersFinal.add(clusterList);
 			}
 				
-				for (Point p : punkte) {										//für alle punkte die minimale Distanz zum aktuellen Zentrum berechnen
+				for (Point p : punkteT) {										//für alle punkte die minimale Distanz zum aktuellen Zentrum berechnen
 				
 					int cl = 0;
 					double minDist = centers.get(0).distance(p); 
@@ -126,14 +130,72 @@ public class ClusteringRandomKmeans {
 		while (iterator.hasNext()) {
 			
 			List<Point> vgl = iterator.next();
-			if (iterator.next().isEmpty()) {
-				iterator.remove();;
+			if (vgl.isEmpty()) {
+				iterator.remove();
 			}
 			
 		}
 		
 		
 		
+	}
+	
+	public List<List<Point>> rec (List<List<Point>> cFinal){
+		boolean trigger = false;
+		
+		
+		do {
+			List<List<Point>> newCl = new ArrayList<List<Point>>();
+			Iterator <List<Point>> iterator = cFinal.iterator();
+			//List<Point> tmp = null;
+		
+			while (iterator.hasNext()) {
+			
+				List<Point> vgl = iterator.next();
+				if (vgl.size() >8) {
+				
+					
+					//tmp = vgl;
+					ClusteringRandomKmeans Temp = new ClusteringRandomKmeans(vgl);
+					Temp.createKmeans(vgl,2);
+					List<List<Point>> tempCl = Temp.getClusters();
+				
+					for(List<Point> cl : tempCl) {
+					
+						newCl.add(cl);
+					}
+				
+					iterator.remove();
+				}
+			
+			}
+			trigger = true;
+			
+			for (List<Point> l : newCl) {
+				
+				clustersFinal.add(l);
+			}
+			
+			for (List<Point> cluster : clustersFinal) {
+				
+				if (cluster.size()>8){
+					System.out.println("zu gro�es cluster");
+					trigger = false;
+					break;
+					
+				}
+				
+			}
+			
+			
+			
+			
+			
+			
+		} while(trigger == false);
+		
+		
+		return clustersFinal;
 	}
 	
 	public List<List<Point>> getClusters(){

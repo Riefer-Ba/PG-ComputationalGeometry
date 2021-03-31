@@ -537,7 +537,7 @@ public class SampleController {
 		public List<List<Point>> clustering() {
 		world.getChildren().remove(ccenters);
 		ccenters.getChildren().clear();
-		
+		globalCluster = null;
 		
 		/*
 		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wählen

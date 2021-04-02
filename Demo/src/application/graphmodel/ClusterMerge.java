@@ -7,10 +7,12 @@ import java.util.NoSuchElementException;
 
 public class ClusterMerge {
 	ArrayList<LinienSegment> FinalTsp = new ArrayList<LinienSegment>();
-
+	ArrayList<double[][]> tspLinked = new ArrayList<double[][]>();
+	
+	
 	public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, ArrayList<double[][]> tsp) {
 		
-		for (int i=0; i< clusters.size() ;i++) {
+		for (int i=0; i< clusters.size() ;i++) { //-1?
 
 		LinienSegment mstEdge =  findClosestCluster(clusters, mst, tsp);
 //		//verbindet Cluster, behaltet Tsp Eigenschaften bei.
@@ -18,6 +20,27 @@ public class ClusterMerge {
 		}
 		
 		FinalTsp(tsp, clusters);
+	}
+	
+	public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, List<LinkedList<Punkt>> tsp) {
+		for (int i=0; i<clusters.size(); i++) {
+			setupAdjMatrix(clusters.get(i), tsp.get(i));
+		}
+
+		int m = clusters.size() -1 ;
+		
+		for (int i=0; i< m ;i++) {
+			System.out.println("linked "+tspLinked.size());
+			System.out.println("tsp "+tsp.size());
+			System.out.println("final "+FinalTsp.size());
+			System.out.println("clusters "+clusters.size());
+			
+		LinienSegment mstEdge =  findClosestCluster(clusters, mst, tspLinked);
+//		//verbindet Cluster, behaltet Tsp Eigenschaften bei.
+
+		}
+		
+		FinalTsp(tspLinked, clusters);
 	}
 
 
@@ -75,20 +98,50 @@ public class ClusterMerge {
 	private LinienSegment ConnectTsp(LinienSegment mstEdge, int i, int j, ArrayList<double[][]> tsp, List<List<Punkt>> clusters) {
 		LinienSegment bestEdge = null;
 		double g0,g1;
-		int a,b;
+		int a=-7,b=-7;
 			
 		//double[][] temp= new double[10000][100000];
-		
+		System.out.println(i);
+		System.out.println(j);
 		//beachte switchen von i und j in manchen fällen.
 		
-		a=clusters.get(i).indexOf(mstEdge.endpkt1);
-		b=clusters.get(j).indexOf(mstEdge.endpkt2);
+		//a=clusters.get(i).indexOf(mstEdge.endpkt1);
+		//b=clusters.get(j).indexOf(mstEdge.endpkt2);
+		
+
+		for(int q=0 ; q < clusters.get(i).size(); q++) {
+			if( clusters.get(i).get(q).samePoint(mstEdge.endpkt1) == true) {
+				a=q;
+			}
+		}
+		
+		for(int q=0 ; q < clusters.get(j).size(); q++) {
+			if( clusters.get(j).get(q).samePoint(mstEdge.endpkt2) == true) {
+				b=q;
+			}
+		}
+		
 		
 		if( a == -1 || b == -1) {
 			System.out.println("selbes Spiel. index switch");
 			System.out.println(a);
 			System.out.println(b);
+			
+			System.out.println("&&&&");
+			System.out.println(tsp.get(i).length);
+			System.out.println(clusters.get(i).size());
+			
+			System.out.println(tsp.get(j).length);
+			System.out.println(clusters.get(j).size());
+			System.out.println("&&&&");
+			
 			//swap i,j	
+			int temp =i;
+			i = j;
+			j = temp;
+					
+			a=clusters.get(i).indexOf(mstEdge.endpkt1);
+			b=clusters.get(j).indexOf(mstEdge.endpkt2);
 		}
 		
 		Punkt[] p1=  zweiNachbarn(i, a, tsp, clusters);		
@@ -145,13 +198,34 @@ public class ClusterMerge {
 	
 	private void TspCombine(int i, int j, ArrayList<double[][]> tsp, List<List<Punkt>> clusters, LinienSegment bestEdge, LinienSegment mst) {
 		// TODO test
+		int a=-1,b=-1,c=-1,d=-1;
+		
 		int iSize = clusters.get(i).size();
 		int jSize = clusters.get(j).size();
-		int a=clusters.get(i).indexOf(mst.endpkt1);
-		int b=clusters.get(j).indexOf(mst.endpkt2);
 		
-		int c=clusters.get(i).indexOf(bestEdge.endpkt1);
-		int d=clusters.get(j).indexOf(bestEdge.endpkt2);
+		for(int q=0 ; q < clusters.get(i).size(); q++) {
+			if( clusters.get(i).get(q).samePoint(mst.endpkt1) == true) {
+				a=q;
+			}
+		}
+		
+		for(int q=0 ; q < clusters.get(j).size(); q++) {
+			if( clusters.get(j).get(q).samePoint(mst.endpkt2) == true) {
+				b=q;
+			}
+		}
+		
+		for(int q=0 ; q < clusters.get(i).size(); q++) {
+			if( clusters.get(i).get(q).samePoint(bestEdge.endpkt1) == true) {
+				c=q;
+			}
+		}
+		for(int q=0 ; q < clusters.get(j).size(); q++) {
+			if( clusters.get(j).get(q).samePoint(bestEdge.endpkt2) == true) {
+				d=q;
+			}
+		}
+
 		
 		if ( a == -1 ) System.out.println("get fucked");
 		if ( c == -1 ) System.out.println("fucked again");
@@ -171,13 +245,13 @@ public class ClusterMerge {
 				combined[h][g] = tsp.get(i)[h][g]; 
 			}
 		}
+		
+		
 		System.out.println(combined.length);
 		int x=0;int y=0;
 		for (int h = iSize; h < iSize+jSize ;h++, x++) { //wenn index fehler, i+j-1!
 			for (int g =iSize; g < iSize+jSize ;g++, y++) {
-				
-				System.out.println(h+" "+g+" "+x+" "+y);
-				combined[h][g] = tsp.get(j)[x][y]; // j hat kein h und g!!! will be outofbounds
+				combined[h][g] = tsp.get(j)[x][y]; 
 				if( g == iSize+jSize -1) {
 					y=-1;
 				}
@@ -226,17 +300,25 @@ public class ClusterMerge {
 		Punkt[] zwei = new Punkt[2];
 		int counter =0;
 		
-		for(int p= 0; p < tsp.get(i).length ; p++) {
-			if (tsp.get(i)[a][p] == 1 && counter == 0) {
-				zwei[0] = clusters.get(i).get(p);
-				counter++;
-				}
-			else if (tsp.get(i)[a][p] == 1 && counter == 1) {
-				zwei[1] = clusters.get(i).get(p);
-				}
+		
+		if( tsp.get(i).length >2) {
+		
+			for(int p= 0; p < tsp.get(i).length ; p++) {
+				if (tsp.get(i)[a][p] == 1 && counter == 0) {
+					zwei[0] = clusters.get(i).get(p);
+					counter++;
+					}
+				else if (tsp.get(i)[a][p] == 1 && counter == 1) {
+					zwei[1] = clusters.get(i).get(p);
+					}
+			}
 		}
-		zwei[0].printPunkt();
-		zwei[1].printPunkt();
+		else {
+			zwei[0] = clusters.get(i).get(0); 
+			zwei[1] = clusters.get(i).get(1); 
+		}
+		
+
 		
 		return zwei;
 	}
@@ -380,6 +462,51 @@ public class ClusterMerge {
 	public ArrayList<LinienSegment> getTsp(){
 		
 		return FinalTsp;
+	}
+	
+	private void setupAdjMatrix(List<Punkt> cluster, LinkedList<Punkt> tsp) {
+		int m = cluster.size();
+		double[][] AdjMatrix = new double[m][m];
+		int a = 100,b = 100;
+		
+		//fill with 0. Array fill doesnt work
+		for (int h =0; h < m ;h++) {
+			for (int g =0; g < m ;g++) {
+				AdjMatrix[h][g] = 0; 
+			}
+		}
+		
+		for (int i=0 ; i < tsp.size() -1; i++) { 
+
+			for(int j=0 ; j < cluster.size(); j++) {
+				if( cluster.get(j).samePoint(tsp.get(i)) == true) {
+					a=j;
+				}
+				if( cluster.get(j).samePoint(tsp.get(i+1)) == true) {
+					b = j;
+				}
+				
+			}
+
+			AdjMatrix[a][b] = 1;
+			AdjMatrix[b][a] = 1;
+		}
+		
+		for(int j=0 ; j < cluster.size(); j++) {
+			if( cluster.get(j).samePoint(tsp.getLast()) == true) {
+				a=j;
+			}
+			if( cluster.get(j).samePoint(tsp.getFirst()) == true) {
+				b = j;
+			}
+			
+		}
+		
+		AdjMatrix[a][b] = 1;
+		AdjMatrix[b][a] = 1;
+		
+		
+		tspLinked.add(AdjMatrix);
 	}
 
 }

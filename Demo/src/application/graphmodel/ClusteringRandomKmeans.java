@@ -3,6 +3,7 @@ package application.graphmodel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class ClusteringRandomKmeans {
 
@@ -11,13 +12,15 @@ public class ClusteringRandomKmeans {
 	List<Point> punkte = new ArrayList<Point>();
 	List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
 	int k = Math.round(punkte.size()/4);
-	 
-							
+	ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
 	
+	boolean bed;						
+	boolean init = false;
 	
-	public ClusteringRandomKmeans(List<Point> pts) {
+	public ClusteringRandomKmeans(List<Point> pts, boolean choice) {
 		
 		this.punkte = pts;
+		this.bed = choice;
 		
 	}
 	
@@ -25,13 +28,14 @@ public class ClusteringRandomKmeans {
 	public void execute() {
 		
 		createKmeans(punkte, k);
+		init = true;
 		rec(clustersFinal);
 		
 	}
 	
 	public void createKmeans(List<Point> punkteT, int centerCount) {
 		
-		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
+		//ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
 		ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
 		
 		if(centerCount>4) {centerCount = 4;}
@@ -54,14 +58,22 @@ public class ClusteringRandomKmeans {
 		
 		for (int i = 0; i<centerCount;i++) {	
 			
-			List<Point> clusterList = new ArrayList<>();
-			clustersFinal.add(clusterList);
+			if (bed == false || init == true) {
+				List<Point> clusterList = new ArrayList<>();
+				clustersFinal.add(clusterList);
 			
-			double xCord = (Math.random() * (maxX-minX)) + minX;
-			double yCord = (Math.random() * (maxY-minY)) + minY;
+				double xCord = (Math.random() * (maxX-minX)) + minX;
+				double yCord = (Math.random() * (maxY-minY)) + minY;
 			
-			centers.add( new clusterCentroid(xCord, yCord));
+				centers.add( new clusterCentroid(xCord, yCord));
+			}
 			
+			else {
+				double[] cord  = neuerCentroid(punkteT, centers);
+				
+				centers.add(new clusterCentroid(cord[0], cord[1]));
+				
+			}
 		}
 		
 		
@@ -156,7 +168,7 @@ public class ClusteringRandomKmeans {
 				
 					
 					//tmp = vgl;
-					ClusteringRandomKmeans Temp = new ClusteringRandomKmeans(vgl);
+					ClusteringRandomKmeans Temp = new ClusteringRandomKmeans(vgl, bed);
 					Temp.createKmeans(vgl,2);
 					List<List<Point>> tempCl = Temp.getClusters();
 				
@@ -166,6 +178,7 @@ public class ClusteringRandomKmeans {
 					}
 				
 					iterator.remove();
+					//centers.remove(clustersFinal.indexOf(vgl));
 				}
 			
 			}
@@ -196,6 +209,34 @@ public class ClusteringRandomKmeans {
 		
 		
 		return clustersFinal;
+	}
+	
+	private double[] neuerCentroid(List<Point> punkte, ArrayList<clusterCentroid> centers) {
+		double[] cord = {0,0};
+		double minDist = 10000;
+		ArrayList<Double> DistArray = new ArrayList<Double>();
+		ArrayList<Double> DuplikatedDist = new ArrayList<Double>();
+		
+		for(int i=0; i< punkte.size(); i++) {
+			for(int k=0; k< centers.size(); k++) {
+				double temp = Math.pow(centers.get(k).distance(punkte.get(i)), 2);
+				if(temp < minDist) minDist=temp; 
+			}
+			DistArray.add(minDist);
+			
+			double repeat = DistArray.get(i)/50.0;	//D^2 für alle 50 Einheiten einmal einfügen
+			for(int k=0; k < repeat ; k++) {			//auf größe anpassen!!!!!
+				DuplikatedDist.add(DistArray.get(i));
+			}
+		}
+		
+		Random rnd = new Random();
+		double r = DuplikatedDist.get(rnd.nextInt(DuplikatedDist.size()));
+		
+		cord[0]=punkte.get(DistArray.indexOf(r)).getX();
+		cord[1]=punkte.get(DistArray.indexOf(r)).getX();
+		
+		return cord;
 	}
 	
 	public List<List<Point>> getClusters(){

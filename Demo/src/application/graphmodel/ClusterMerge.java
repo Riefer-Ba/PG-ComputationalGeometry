@@ -313,6 +313,12 @@ public class ClusterMerge {
 					}
 			}
 		}
+		
+		else if(tsp.get(i).length == 1) {
+			zwei[0] = clusters.get(i).get(0);
+			zwei[1] = clusters.get(i).get(0);
+		}
+		
 		else {
 			zwei[0] = clusters.get(i).get(0); 
 			zwei[1] = clusters.get(i).get(1); 

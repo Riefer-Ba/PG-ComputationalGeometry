@@ -94,4 +94,12 @@ public class Punkt{
 		
 		return false;
 	}
+	
+	public boolean samePoint(Punkt other) {
+		if ((this.getX() == other.getX()) &&
+			(this.getY() == other.getY()) ) {
+			return true;
+		}
+		return false;
+	}
 }

@@ -538,11 +538,11 @@ public class SampleController {
 		world.getChildren().remove(ccenters);
 		ccenters.getChildren().clear();
 		globalCluster = null;
-		
+		boolean bed = false;
 		/*
 		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wählen
 		int k = 4;
-		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
+		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();
 		ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
 		List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
 		boolean flag = true;
@@ -716,8 +716,20 @@ public class SampleController {
 		//	if(clustersFinal.get(2).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(2));}
 		//	if(clustersFinal.get(3).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(3));}
 		*/
+		if(choicebox.getValue() == "K++ means") {
+			
+			bed = true;
+			
+			
+		}
 		
-		ClusteringRandomKmeans cl = new ClusteringRandomKmeans(graphs.punkte);
+		else if(choicebox.getValue() == "random k means") {
+			
+			bed = false;
+			
+		}
+		
+		ClusteringRandomKmeans cl = new ClusteringRandomKmeans(graphs.punkte, bed);
 		cl.execute();
 		globalCluster = cl.getClusters();
 		  // world.getChildren().addAll(ccenters);

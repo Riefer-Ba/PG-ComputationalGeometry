@@ -120,7 +120,14 @@ public class LinienSegment implements Comparable<LinienSegment>{
 		mst.set(j, mst.get(i));
 		mst.set(i, temp);
 	}
+	
 
-
+	public double TourLaenge(ArrayList<LinienSegment> ls) {
+		double tour =0;
+		for (LinienSegment l : ls){
+			tour += l.gewicht;
+		}
+		return tour;
+	}
 	
 }

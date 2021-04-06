@@ -88,7 +88,7 @@ public class ClusteringRandomKmeans {
 				clustersFinal.add(clusterList);
 			}
 				
-				for (Point p : punkteT) {										//für alle punkte die minimale Distanz zum aktuellen Zentrum berechnen
+				for (Point p : punkteT) {										//fÃ¼r alle punkte die minimale Distanz zum aktuellen Zentrum berechnen
 				
 					int cl = 0;
 					double minDist = centers.get(0).distance(p); 
@@ -192,7 +192,7 @@ public class ClusteringRandomKmeans {
 			for (List<Point> cluster : clustersFinal) {
 				
 				if (cluster.size()>8){
-					System.out.println("zu gro�es cluster");
+					System.out.println("zu großes cluster");
 					trigger = false;
 					break;
 					
@@ -211,30 +211,44 @@ public class ClusteringRandomKmeans {
 		return clustersFinal;
 	}
 	
-	private double[] neuerCentroid(List<Point> punkte, ArrayList<clusterCentroid> centers) {
+		private double[] neuerCentroid(List<Point> punkte, ArrayList<clusterCentroid> centers) {
 		double[] cord = {0,0};
 		double minDist = 10000;
 		ArrayList<Double> DistArray = new ArrayList<Double>();
 		ArrayList<Double> DuplikatedDist = new ArrayList<Double>();
+		double globalMin =0;
 		
 		for(int i=0; i< punkte.size(); i++) {
-			for(int k=0; k< centers.size(); k++) {
+			for(int k=0; k< centers.size(); k++) { //sucht den min Abstand 
 				double temp = Math.pow(centers.get(k).distance(punkte.get(i)), 2);
 				if(temp < minDist) minDist=temp; 
 			}
 			DistArray.add(minDist);
 			
-			double repeat = DistArray.get(i)/50.0;	//D^2 für alle 50 Einheiten einmal einfügen
-			for(int k=0; k < repeat ; k++) {			//auf größe anpassen!!!!!
+			if(globalMin == 0) {
+				globalMin=minDist; //gloablMin zur anpassung der Wahrscheinlichkeit
+			}
+			else if (globalMin > minDist){
+				globalMin = minDist;
+			}
+			
+			minDist = 10000; // reset minDist
+			
+		}
+		
+		for(int i=0; i< punkte.size(); i++) {
+			double repeat = DistArray.get(i)/globalMin;	//D^2 fuer alle minDist*Einheiten einmal einfuegen
+			for(int k=0; k < repeat ; k++) {			
 				DuplikatedDist.add(DistArray.get(i));
 			}
 		}
+		
 		
 		Random rnd = new Random();
 		double r = DuplikatedDist.get(rnd.nextInt(DuplikatedDist.size()));
 		
 		cord[0]=punkte.get(DistArray.indexOf(r)).getX();
-		cord[1]=punkte.get(DistArray.indexOf(r)).getX();
+		cord[1]=punkte.get(DistArray.indexOf(r)).getY(); //fixed ; double x macht kein sinn.
 		
 		return cord;
 	}

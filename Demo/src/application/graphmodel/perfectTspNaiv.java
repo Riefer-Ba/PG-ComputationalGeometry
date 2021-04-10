@@ -12,11 +12,27 @@ public class perfectTspNaiv{
 			
 		double[][] Adj = setupAdjMatrix(clusters , DelaunayK);
 		
+		if(Adj[Adj.length-2][Adj.length-1] == 0) {
+			Adj[Adj.length-2][Adj.length-1] =1;
+			Adj[Adj.length-1][Adj.length-2] =1;
+		}
+		
+//		if(Adj[Adj.length-2][Adj.length-1] == 0) {
+//			if(Adj[0][Adj.length-1] == 1) {
+//				Punkt temp =clusters.get(0);
+//				clusters.add(0, clusters.get(Adj.length-2)); //-1?
+//				clusters.remove(1);
+//				clusters.add(Adj.length, temp);
+//				
+//			}
+//		}
+		
 		printAdj(Adj);		//for test
 		System.out.println("$$$");
 		
 		if(clusters.size() > 3) {
 			getTspTour(clusters, Adj);
+			System.out.println(allTsp.size());
 			bestTour(clusters);
 		}
 		else {
@@ -112,8 +128,16 @@ public class perfectTspNaiv{
 							System.out.println("abbruch Punkt mehr als 2x verwendet");
 							//ein punkt hat mehr als 2 Nachbarn in dieser Tour, abbruch!
 							
+							System.out.println("%%%%%%%%");
+							System.out.println(visitedN[0]);
+							System.out.println(visitedN[1]);
+							System.out.println(visitedN[2]);
+							System.out.println(visitedN[3]);
+							System.out.println(visitedN[4]);
+							printIndexTour(indexTour);		
+							System.out.println("%%%%%%%%");
 
-							reset(indexTour, visitedB, visitedN, i,k);
+							reset(indexTour, visitedB, visitedN, i,k, currentBest);
 							
 							
 							System.out.println("TODO%%%%%%"); //TODO adapt für nicht letzter schritt
@@ -147,7 +171,8 @@ public class perfectTspNaiv{
 					}
 					else {
 						System.out.println("do nothing");
-						break; //break? TODO
+					//	break; //break? TODO
+						//hier gibt es keine nicht bearbeitete 1 in der Reihe
 					}
 				}		
 								
@@ -241,6 +266,12 @@ public class perfectTspNaiv{
 				printAdj(AdjTest);
 				allTsp.add(AdjTest);
 				
+				System.out.println(visitedN[0]);
+				System.out.println(visitedN[1]);
+				System.out.println(visitedN[2]);
+				System.out.println(visitedN[3]);
+				System.out.println(visitedN[4]);
+				
 				int ind[] = resetLetzterSchritt(indexTour, visitedB, visitedN, i); //vorher auch k
 				i = ind[0];
 				k = ind[1] -1;
@@ -272,10 +303,108 @@ public class perfectTspNaiv{
 		return returns;
 	}
 
-	private void reset(int[][] indexTour, boolean[][] visitedB, int[] visitedN, int i, int k) {
-		// TODO Auto-generated method stub
-		System.out.println("in the normal reset");
-		printIndexTour(indexTour);
+		private int[] reset(int[][] indexTour, boolean[][] visitedB, int[] visitedN, int i, int k, double[][] adj) {
+			// TODO Auto-generated method stub
+			System.out.println("in the normal reset");
+			//suche das nächste false, nimm das letzte Element aus der Tour.
+			
+			int count =0;
+			int[] returns = {-3,-3, 0};
+			int m = visitedB.length;
+			int v1 =m+3; int v2=m+3;
+			
+			System.out.println("%%%%%%%%");
+			System.out.println(visitedN[0]);
+			System.out.println(visitedN[1]);
+			System.out.println(visitedN[2]);
+			System.out.println(visitedN[3]);
+			printIndexTour(indexTour);		
+			System.out.println("%%%%%%%%");
+			
+			
+			//letztes element != 0,0 suchen, entfernen
+			
+			for(int p=i ;p< m; p++) {
+				if(indexTour[p][0] == 0 && indexTour[p][1] ==0) {
+					indexTour[p-1][0] = 0; 
+					indexTour[p-1][1] = 0;
+					break;
+				}
+			}
+//			indexTour[][0] =0;
+//			indexTour[][1] =0;
+			
+			visitedN[i]--;
+			visitedN[k]--;
+		//	visitedB[i][k]=false;
+			
+			
+			printAdj(visitedB);
+			
+			//das erste false, das nachdem zuletzt hinzugefügten element auftritt.
+			for ( int o=i ; o < m ; o++) {	
+				if( i == o) {
+					for (int h=k ; h < m  ; h++) { //TODO hier passt i nicht. der muss, wenn er in der selben reihe ist, bei k anfangen.
+						//also sowas wie 
+						if(visitedB[o][h] == false) { 
+							returns[0] =o;
+							returns[1] =h;
+							visitedB[i][k]=false;
+							
+							System.out.println(o);
+							System.out.println(h);
+							
+							
+							return returns;
+						}
+					}
+				}
+				else {
+					for (int h=1 ; h < m  ; h++) { //TODO hier passt i nicht. der muss, wenn er in der selben reihe ist, bei k anfangen.
+											//also sowas wie 
+						if(visitedB[o][h] == false) { 
+							returns[0] =o;
+							returns[1] =h;
+						//	visitedB[i][k]=false;
+							
+							System.out.println(o);
+							System.out.println(h);
+							
+							
+							return returns;
+						}
+					}
+				}
+			}
+			//sollte es keins geben, teste ob bereits alles besucht wurde.
+					//erstmal in der Reihe von i!!!!!!!!!! 
+			for ( int o=0 ; o < m ; o++) {	
+				for (int h=o+1 ; h < m  ; h++) {
+					if(visitedB[o][h] == false) { 
+						
+						
+						returns[0] =o;
+						returns[1] =h;
+						
+						System.out.println("hier müssen jetzt noch alle 3 Strukturen verändert werden.");
+						
+						System.out.println(o);
+						System.out.println(h);
+						
+						
+						return returns;
+					}
+				}
+			}	
+			
+			
+			System.out.println(i);
+			System.out.println(k);
+			printAdj(visitedB);
+			System.out.println("shouldnt be here");
+
+			return returns;
+		
 	}
 
 	private int[] resetLetzterSchritt(int[][] indexTour, boolean[][] visitedB, int[] visitedN, int i) {
@@ -296,8 +425,8 @@ public class perfectTspNaiv{
 							visitedB[o][p] = false;
 							}
 							//2. die Anzahl, mit der ein Punkt in der Tour vorkommt 
-							visitedN[o]--;
-							visitedN[m-1]--;
+							//visitedN[o]--;
+							//visitedN[m-1]--;
 							
 //							System.out.println(visitedN[0]);
 //							System.out.println(visitedN[1]);
@@ -308,15 +437,23 @@ public class perfectTspNaiv{
 							
 							//3. die Kante aus der IndexTour herrausnehmen
 							for( int w=0 ; w < m; w++) {
-								
 								//TODO Indexe richtig?
 								if (indexTour[w][0] == o && indexTour[w][1] == m-1 ||
 										indexTour[w][0] == m-1 && indexTour[w][1] == o) {
 									indexTour[w][0] =0;
 									indexTour[w][1] =0;
-								}
-								indexTour[m-1][0] =0; //wenn im norm reset redo
-								indexTour[m-1][1] =0;
+									//2. die Anzahl, mit der ein Punkt in der Tour vorkommt 
+									visitedN[o]--;
+									visitedN[m-1]--;
+									
+									for(int u=w; u< m; u++) {
+										visitedN[indexTour[u][0]]--;
+										visitedN[indexTour[u][1]]--;								
+										indexTour[u][0] =0;
+										indexTour[u][1] =0;
+									}
+									//und alle dahinter auch
+								}							
 							}
 							break;
 					}
@@ -326,8 +463,8 @@ public class perfectTspNaiv{
 					else { // das erste false in der Reihe finden
 						if(visitedB[o][h] == false) {
 						//das true vor dem ersten false ist derzeit in der index tour, rausnhemen um neue Tour zu starten.
-						visitedN[o]--;
-						visitedN[h-1]--;	
+						//visitedN[o]--;
+						//visitedN[h-1]--;	
 						
 //						System.out.println(visitedN[0]);
 //						System.out.println(visitedN[1]);
@@ -337,12 +474,35 @@ public class perfectTspNaiv{
 				//		printIndexTour(indexTour);
 						
 						for( int w=0 ; w < m; w++) {
-							if (indexTour[w][0] == o && indexTour[w][1] == h-1 ||
-									indexTour[w][0] == h-1 && indexTour[w][1] == o) {
-								indexTour[w][0] =-2;
-								indexTour[w][1] =-2;
+							//TODO Indexe richtig?
+							if (indexTour[w][0] == o && indexTour[w][1] == m-1 ||
+									indexTour[w][0] == m-1 && indexTour[w][1] == o) {
+								indexTour[w][0] =0;
+								indexTour[w][1] =0;
+								//2. die Anzahl, mit der ein Punkt in der Tour vorkommt 
+								for(int u=w; u< m; u++) {							
+									indexTour[u][0] =0;
+									indexTour[u][1] =0;
+								}
+								//und alle dahinter auch
+							}							
+						}
+						
+						for(int ind =0;ind < m ; ind++) {
+							visitedN[ind]=0;
+						}
+						
+						for (int ind =0; ind < m ; ind++) {
+							if ( indexTour[ind][0] == 0 && indexTour[ind][1] == 0) {
+								break;
+							}
+							else {
+								visitedN[indexTour[ind][0]]++;
+								visitedN[indexTour[ind][1]]++;
 							}
 						}
+						
+						
 					//	printIndexTour(indexTour);
 							
 						System.out.println("reset: Index des ersten false   i:"+ o+"k: "+ h);
@@ -351,6 +511,11 @@ public class perfectTspNaiv{
 						
 						System.out.println("@@@@@ After:");
 						printAdj(visitedB);
+						System.out.println(visitedN[0]);
+						System.out.println(visitedN[1]);
+						System.out.println(visitedN[2]);
+						System.out.println(visitedN[3]);
+						System.out.println(visitedN[4]);
 						System.out.println("@@@@@");
 						printIndexTour(indexTour);
 						 				

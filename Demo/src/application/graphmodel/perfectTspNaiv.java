@@ -5,21 +5,25 @@ import java.util.List;
 
 public class perfectTspNaiv{
 	ArrayList<double[][]> allTsp = new ArrayList<double[][]>();
+	ArrayList<LinienSegment> FinalTspK = new ArrayList<LinienSegment>();
 
 	
 	public void execute(List<Punkt> clusters, ArrayList<LinienSegment> DelaunayK) {
 			
-		double[][] Adj = setupAdjMatrix(clusters , DelaunayK); //clusters.get(i)
-		printAdj(Adj);
+		double[][] Adj = setupAdjMatrix(clusters , DelaunayK);
+		
+		printAdj(Adj);		//for test
 		System.out.println("$$$");
 		
 		if(clusters.size() > 3) {
 			getTspTour(clusters, Adj);
+			bestTour(clusters);
 		}
 		else {
 			//bereits fertig.
 			allTsp.add(Adj);
 		}
+				
 	}
 
 	private double[][] setupAdjMatrix(List<Punkt> cluster, ArrayList<LinienSegment> DelaunayK) {
@@ -50,10 +54,7 @@ public class perfectTspNaiv{
 	
 
 	private boolean getTspTour(List<Punkt> cluster, double[][] adj) {
-		int m = cluster.size(); 
-		boolean firstTour =true;
-		double laengeCurrentBest =100000;
-		
+		int m = cluster.size(); 		
 		int[][] indexTour = new int[m][2]; //speichert die Tsp Kanten als 2 Pkte
 		int[] visitedN = new int[m];
 		double[][] currentBest = new double[m][m];
@@ -82,9 +83,27 @@ public class perfectTspNaiv{
 					visitedB[i][k] = true;
 					if (adj[i][k]  == 1) {
 						
-						indexTour[i][0] = i; 
-						indexTour[i][1] = k;
+						
+						
+						
+						//das hier muss geämdert werden für nuen algo
+//						indexTour[i][0] = i; 
+//						indexTour[i][1] = k;
 
+					//	for(int p=i ;p< m; p++) {
+						//	if(indexTour[p][0] == 0 && indexTour[p][1] ==0) {
+								indexTour[i][0] = i; 
+								indexTour[i][1] = k;
+							//	break;
+						//	}
+					//	}
+						
+						
+						/////
+						
+						printIndexTour(indexTour);
+						System.out.println("%%%%%%"); 
+						
 						visitedN[i]++;
 						visitedN[k]++;
 												
@@ -95,30 +114,36 @@ public class perfectTspNaiv{
 							
 
 							reset(indexTour, visitedB, visitedN, i,k);
+							
+							
 							System.out.println("TODO%%%%%%"); //TODO adapt für nicht letzter schritt
+							
+							
+							
 							int ind[] = resetLetzterSchritt(indexTour, visitedB, visitedN, i); //vorher auch k
 							i = ind[0];
 							k = ind[1] -1;
 							
 							if(ind[0] == -7  || ind[1] == -7) {
-								System.out.println("fertig die beste Tour:");
-								printAdj(currentBest);
-							//	printIndexTour(indexTour); ist hier schon gibberish.
-								System.out.println(visitedN[0]);
-								System.out.println(visitedN[1]);
-								System.out.println(visitedN[2]);
-								System.out.println(visitedN[3]);
+								System.out.println("fertig, alle Touren gefunden:");
+									//	printIndexTour(indexTour); ist hier schon gibberish.
+							//	LsAusAdjMatrix(currentBest, cluster);
 								return true;
 							}
 							
 							
 						}		//soviele zeilen hochgehen, bis das erste false gefunden!
 						
-						else {
+						else break; //if(indexTour[m-2][0] != 0 && indexTour[m-2][0] != 0){
 						//	i++;		//Tour ist noch gültig, eine Zeile hochgehen
-							break;
-						}
-
+						//	break;
+							
+							
+							//genau das selbe wie unten der code hier. auslagern?
+							
+							
+							//this is the case
+							
 					}
 					else {
 						System.out.println("do nothing");
@@ -128,116 +153,129 @@ public class perfectTspNaiv{
 								
 				//letzte Wert über der Hauptdiagonalen wurde bearbeitet.
 				
-			//	if( i == 0 && )
-				
-				
+			//	if( i == 0 && )			
 				if(k == m-1 && i == m-1) { //&& i== m-2 hinzugefügt
-					System.out.println("obere diagonale, unten rechts");
-					// suche die 2 visited N == 1(x,y), wenn  allTsp.get(l)[x][y]  == 1 -> tour gefunden
-					int v1 =m+3; int v2=m+3;
-					
-//					System.out.println("%%%%%%%%");
-//					System.out.println("%%%%%%%%");
-//					System.out.println("%%%%%%%%");
-//					
-//					System.out.println(visitedN[0]);
-//					System.out.println(visitedN[1]);
-//					System.out.println(visitedN[2]);
-//					System.out.println(visitedN[3]);
-//					
-//					printIndexTour(indexTour);
-//					
-//					System.out.println("%%%%%%%%");
-//					System.out.println("%%%%%%%%");
-//					System.out.println("%%%%%%%%");
-					
-					int count = 0;
-					for(int h=0 ; h< m -1; h++) {
-						if (visitedN[h] == 1) {
-							if( count == 0) {
-							v1= h;
-							count++;
-							}
-							else {
-							v2 = h;
-							break;
-							}
-						}
-
-					}
-					
-					if(v1 == m+3 || v2== m+3) {
-						System.out.println("Fehler beim zusammenführen der letzten 2 Pkte, reset tour"); 
-						int ind[] = resetLetzterSchritt(indexTour, visitedB, visitedN, i); //vorher auch k
-						i = ind[0];
-						k = ind[1] -1;
-						 // reset gibt indx von letztem false aus.die for loop erhöht k um 1. preemtive strike -1.
-					}
-					
-					
-					else if( adj[v1][v2] == 1 ) { //tsp tour gefunden
-							System.out.println("neue Tour gefunden. to test");
-							indexTour[m-1][0] = v1;
-							indexTour[m-1][1] = v2;
-							
-							
-							printIndexTour(indexTour);
-							double[][] AdjTest = erzeugeAdj(indexTour);
-								
-							//dies können auch untersch touren sein, aber nur eine gebraucht.
-							if(uniqueTour(AdjTest, laengeCurrentBest, cluster,firstTour ) == true) {
-								System.out.println("neue beste Tour");
-								currentBest = AdjTest;	
-								
-								int ind[] = resetLetzterSchritt(indexTour, visitedB, visitedN, i); //vorher auch k
-								i = ind[0];
-								k = ind[1] -1;
-								
-								if(ind[0] == -7  || ind[1] == -7) {
-									System.out.println("fertig");
-									return true;
-								}
-							}
-							else {
-								System.out.println("selbe Tour oder schlechter als die derzeitig beste");
-								//hier muss auch ein reset passieren!!!!
-							}
-							
-					}
-//					else if ( adj[v1][v2] == 0 ){ //keine tsp tour, verbindung nicht möglich. 2 reihen hoch. reset visited reihe k-2?1?
-//						reset(indexTour, visitedB, visitedN, i,k);
-//					}
-				}
 				
-				if( i == 0 ) {
-					//wenn alle visited bool == true sind -> abbruch. Alle Touren gefunden.
-					if( k == m-1) {
-						System.out.println("omg i made it to the end");
+					//Tour ist bis auf den letzten Punkt vollstänsig. Testet ob Tour geschlossen werden kann
+					//testeet auch ob alle möglichen Touren schon bearbeitet wurden.
+					int[] finished = LastIndexTestAusgelagert(indexTour, visitedB, visitedN, i, k, adj);
+					
+					if (finished[2] == 1) {
+						return true;
 					}
-				}
-			
-			}
-			
-			//reset all visited bool für alle "größeren" Reihen auf false, wenn in eine untere Reihe gegangen wird
-				
-			
-			//reset all visited N auf 0? ALLE!? (ja wenn zurück in der ersten Reihe!)
-			
+					else {
+						i= finished[0];
+						k= finished[1];
+					}				
+				} 	
+			}		
 		}
-		
-		allTsp.add(currentBest);
-		System.out.println("hier");
-		printAdj(allTsp.get(0));
+		System.out.println("das darf nicht ausgegeben werden!");
 		
 		return true;
 	}
-	
+
+	private int[] LastIndexTestAusgelagert(int[][] indexTour, boolean[][] visitedB, int[] visitedN, int i, int k, double[][] adj) {
+		int[] returns = {-3,-3, 0};
+		
+		
+		System.out.println("in ausgelagert");
+		
+		int m = visitedN.length;
+		int v1 =m+3; int v2=m+3;
+		
+		System.out.println("%%%%%%%%");
+		System.out.println(visitedN[0]);
+		System.out.println(visitedN[1]);
+		System.out.println(visitedN[2]);
+		System.out.println(visitedN[3]);
+		printIndexTour(indexTour);		
+		System.out.println("%%%%%%%%");
+		
+		
+		System.out.println("obere diagonale, unten rechts");
+		// suche die 2 visited N == 1(x,y), wenn  allTsp.get(l)[x][y]  == 1 -> tour gefunden
+		
+		
+		int count = 0;
+		for(int h=0 ; h< m ; h++) {
+			if (visitedN[h] == 1) {
+				if( count == 0) {
+				v1= h;
+				count++;
+				}
+				else {
+				v2 = h;
+				break;
+				}
+			}
+
+		}
+		
+		if(v1 == m+3 || v2== m+3) {
+			System.out.println("Fehler beim zusammenführen der letzten 2 Pkte, reset tour"); 
+			int ind[] = resetLetzterSchritt(indexTour, visitedB, visitedN, i); //vorher auch k
+			i = ind[0];
+			k = ind[1] -1;
+			 // reset gibt indx von letztem false aus.die for loop erhöht k um 1. preemtive strike -1.
+			returns[0] =i;
+			returns[1] =k;
+			
+			if(ind[0] == -7  || ind[1] == -7) {
+				System.out.println("fertig die beste Tour bestimmen");
+				//return true;
+				returns[2] =1;
+			}	
+		}
+		
+		
+		else if( adj[v1][v2] == 1 ) { //tsp tour gefunden
+				System.out.println("neue Tour gefunden. to test");
+				indexTour[m-1][0] = v1;
+				indexTour[m-1][1] = v2;
+				
+				
+				printIndexTour(indexTour);
+				double[][] AdjTest = erzeugeAdj(indexTour);
+				
+				printAdj(AdjTest);
+				allTsp.add(AdjTest);
+				
+				int ind[] = resetLetzterSchritt(indexTour, visitedB, visitedN, i); //vorher auch k
+				i = ind[0];
+				k = ind[1] -1;
+				
+				returns[0] =i;
+				returns[1] =k;
+				
+				if(ind[0] == -7  || ind[1] == -7) {
+					System.out.println("fertig die beste Tour bestimmen");
+					//return true;
+					returns[2] =1;
+				}							
+		}
+		else if ( adj[v1][v2] == 0 ){ //keine tsp tour, verbindung nicht möglich. 2 reihen hoch. reset visited reihe k-2?1?
+			int ind[] = resetLetzterSchritt(indexTour, visitedB, visitedN, i); //vorher auch k
+			i = ind[0];
+			k = ind[1] -1;
+			
+			returns[0] =i;
+			returns[1] =k;
+			
+			if(ind[0] == -7  || ind[1] == -7) {
+				System.out.println("fertig die beste Tour bestimmen");
+				//return true;
+				returns[2] =1;
+			}	
+		}
+
+		return returns;
+	}
+
 	private void reset(int[][] indexTour, boolean[][] visitedB, int[] visitedN, int i, int k) {
 		// TODO Auto-generated method stub
 		System.out.println("in the normal reset");
 		printIndexTour(indexTour);
-		
-		
 	}
 
 	private int[] resetLetzterSchritt(int[][] indexTour, boolean[][] visitedB, int[] visitedN, int i) {
@@ -247,16 +285,12 @@ public class perfectTspNaiv{
 		int m = visitedB.length;
 		int indexReset[] = {-7, -7};
 		
-		
 		System.out.println("@@@@ Before");
 		printAdj(visitedB);
 		
-		//rückwarts das array hochlaufen
 		for ( int o=i ; o >= 0 ; o--) {	//int o=i ; o >= 0 ; o--
-			System.out.println("hi");
 			for (int h=o+1 ; h < m  ; h++) {
 			//	if (o != h) {
-					
 					if( (ganzeReiheBesucht(visitedB, o, indexTour, visitedN)) == true) {
 						for(int p=o+1; p< m; p++) {
 							visitedB[o][p] = false;
@@ -269,6 +303,8 @@ public class perfectTspNaiv{
 //							System.out.println(visitedN[1]);
 //							System.out.println(visitedN[2]);
 //							System.out.println(visitedN[3]);
+						
+							
 							
 							//3. die Kante aus der IndexTour herrausnehmen
 							for( int w=0 ; w < m; w++) {
@@ -276,11 +312,11 @@ public class perfectTspNaiv{
 								//TODO Indexe richtig?
 								if (indexTour[w][0] == o && indexTour[w][1] == m-1 ||
 										indexTour[w][0] == m-1 && indexTour[w][1] == o) {
-									indexTour[w][0] =-2;
-									indexTour[w][1] =-2;
+									indexTour[w][0] =0;
+									indexTour[w][1] =0;
 								}
-								indexTour[m-1][0] =-22;	//TODO potentiell problematisch für groeßere Matrix
-								indexTour[m-1][1] =-22;
+								indexTour[m-1][0] =0; //wenn im norm reset redo
+								indexTour[m-1][1] =0;
 							}
 							break;
 					}
@@ -289,14 +325,7 @@ public class perfectTspNaiv{
 					
 					else { // das erste false in der Reihe finden
 						if(visitedB[o][h] == false) {
-							if( o == 0) System.out.println("that will explain everything");
-						//das true vor dem ersten false ist derzeit in der index tour, rausnhemen.
-							if( o == h-1 ) {
-								System.out.println("das darf nicht passieren! auf diagonale");
-								System.out.println(o);
-								System.out.println(h);
-							}
-						
+						//das true vor dem ersten false ist derzeit in der index tour, rausnhemen um neue Tour zu starten.
 						visitedN[o]--;
 						visitedN[h-1]--;	
 						
@@ -323,45 +352,11 @@ public class perfectTspNaiv{
 						System.out.println("@@@@@ After:");
 						printAdj(visitedB);
 						System.out.println("@@@@@");
-						 
-								
-						return indexReset;
-						
-						}
-						
-					}
-					
-//					if (visitedB[o][h] == true) { //update der 3 Hilfsstrukturen
-//						//TODO hier muss! erstmal gecheckt werden ob o,h auch in der index tour ist! ? oder nicht?
-//						if (o != h) {
-//							//1. den boolean
-//							visitedB[o][h] = false;
-//							//2. die Anzahl, mit der ein Punkt in der Tour vorkommt 
-//							visitedN[o]--;
-//							visitedN[h]--;
-//							
-//							System.out.println(visitedN[0]);
-//							System.out.println(visitedN[1]);
-//							System.out.println(visitedN[2]);
-//							System.out.println(visitedN[3]);
-//							
-//							//3. die Kante aus der IndexTour herrausnehmen
-//									//TODO test ob korrekt mitgeführt wird.
-//							for( int w=0 ; w < m; w++) {
-//								if (indexTour[w][0] == i && indexTour[w][1] == k ||
-//										indexTour[w][0] == k && indexTour[w][1] == i) {
-//									indexTour[w][0] =-2;
-//									indexTour[w][1] =-2;
-//
-//								}
-//							}
-//						}
-//						else System.out.println("do nothing einfach hoch");
-//					}
-//					else {
-//						
-//					}
-				//}
+						printIndexTour(indexTour);
+						 				
+						return indexReset;	
+					}	
+				}
 			}
 		}
 
@@ -378,73 +373,10 @@ public class perfectTspNaiv{
 
 	private boolean ganzeReiheBesucht(boolean[][] visitedB, int o, int[][] indexTour, int[] visitedN) {
 		int m= visitedB.length;
-		
-		//ein element nicht besucht
 		for(int i=0; i< m ; i++) {
 			if (visitedB[o][i] == false) return false;
 		}
-		//alle elemente besucht, alle 3 Hilfsstrukturen updaten:
-		// das letzte element der reihe ist in der derzeitigen tsp tour -> rausnehmen.
-		
 		return true;
-	}
-
-	private boolean uniqueTour(double[][] adjTest, double laengeCurrentBest, List<Punkt> cluster, boolean firstTour) {
-		// TODO test
-		
-		System.out.println("unique tour");
-		
-		double newLaenge;
-		int m = cluster.size();
-		ArrayList<LinienSegment> tspSegmente = new ArrayList<LinienSegment>();
-
-		for (int i=0 ; i < m ; i++) {	
-			for (int k=i+1 ; k < m ; k++) {
-				if (adjTest[i][k] == 1) {
-					tspSegmente.add(new LinienSegment(cluster.get(i),cluster.get(k)));
-				}
-			}
-		}
-		
-		newLaenge = tspSegmente.get(0).TourLaenge(tspSegmente);
-		System.out.println(newLaenge);
-		System.out.println(laengeCurrentBest);
-		
-		if( firstTour == true) {
-			laengeCurrentBest = newLaenge;
-			System.out.println(laengeCurrentBest);
-			System.out.println(newLaenge);
-			System.out.println("firstTour ist true");
-			
-			return true;
-		}
-		else {
-			if( newLaenge < laengeCurrentBest) {
-				System.out.println("neue Tour nicht besser");
-				
-				System.out.println("@@@@@");
-				System.out.println("@@@@@");
-				System.out.println(newLaenge);
-				System.out.println(laengeCurrentBest);
-				
-				System.out.println("should return false weil das die selbe Tour ist");
-				
-				printAdj(adjTest);
-				printAdj(allTsp.get(0));
-				
-				System.out.println("@@@@@");
-				System.out.println("@@@@@");
-				
-				laengeCurrentBest = newLaenge;
-				return true;
-			}
-			
-			else {
-				System.out.println("neue Tour nicht besser");
-				return false;
-			}
-		}
-		//hier kann tsp schon als ls Tour abgespeichert werden.
 	}
 
 	private double[][] erzeugeAdj(int[][] indexTour) {
@@ -470,7 +402,7 @@ public class perfectTspNaiv{
 		return AdjMatrix;
 	}
 
-	public void printAdj(double[][] AdjMatrix ) {
+	private void printAdj(double[][] AdjMatrix ) {
 		for ( int i=0; i<AdjMatrix.length ;i++) {
 			for ( int j=0; j<AdjMatrix.length ;j++) {
 				System.out.print(" : "+ AdjMatrix[i][j] );
@@ -481,7 +413,7 @@ public class perfectTspNaiv{
 		}
 	}
 	
-	public void printAdj(boolean[][] AdjMatrix ) {
+	private void printAdj(boolean[][] AdjMatrix ) {
 		for ( int i=0; i<AdjMatrix.length ;i++) {
 			for ( int j=0; j<AdjMatrix.length ;j++) {
 				System.out.print(" : "+ AdjMatrix[i][j] );
@@ -496,6 +428,69 @@ public class perfectTspNaiv{
 		for(int i=0; i< indexTour.length; i++) {
 			System.out.println(" "+indexTour[i][0] +" "+indexTour[i][1]);
 		}
+	}
+
+	private void bestTour(List<Punkt> cluster) {
+		// TODO test für n>4		
+		double newLaenge, laengeCurrentBest =999999;
+		int indexBesteTour =0;	
+		ArrayList<LinienSegment> tspSegmente = new ArrayList<LinienSegment>();
+
+		for (int i=0 ; i < allTsp.size() ; i++) {	
+			
+			for (int j =0 ; j < allTsp.get(i).length ; j++) {
+				for (int k=j+1 ; k < allTsp.get(i).length ; k++) {
+					if (allTsp.get(i)[j][k] == 1) {
+						tspSegmente.add(new LinienSegment(cluster.get(j),cluster.get(k)));
+					}
+				}
+			}		
+				newLaenge = tspSegmente.get(0).TourLaenge(tspSegmente);
+			
+				if( i == 0) {
+					laengeCurrentBest = newLaenge;
+					System.out.println(laengeCurrentBest);
+					System.out.println(newLaenge);
+				}
+				else {
+					if( newLaenge < laengeCurrentBest) {
+						System.out.println("neue Tour besser");
+						laengeCurrentBest = newLaenge;
+						indexBesteTour = i;
+					}
+					else {
+						System.out.println("neue Tour nicht besser"); //debugging only
+					}
+				}
+				
+			for (int h =0 ; h < tspSegmente.size() +3 ; h++) { //wieso +3? weiß ich auch nicht :)
+				//TODO hier stimmt was nicht.....
+				tspSegmente.remove(0);
+			}
+		//	tspSegmente.remove(0);
+		//	tspSegmente.remove(0);
+		}
+		
+		LsAusAdjMatrix(allTsp.get(indexBesteTour), cluster);
+	}
+	
+	private void LsAusAdjMatrix(double[][] currentBest, List<Punkt> clusters) {
+		// TODO Auto-generated method stub
+		for (int i=0; i< currentBest.length ; i++) {
+			for (int j=i; j< currentBest.length ; j++) {
+				if (currentBest[i][j] == 1) {
+					FinalTspK.add(new LinienSegment(clusters.get(i), clusters.get(j)));
+				}
+			}
+		}
+		for (int i=0; i< FinalTspK.size(); i++) {
+			FinalTspK.get(i).printLs();
+		}
+	}
+	
+	public ArrayList<LinienSegment> finalEdges(double[][] currentBest){
+		
+		return FinalTspK;
 	}
 
 }

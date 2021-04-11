@@ -1,3 +1,5 @@
+package application.graphmodel;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +10,7 @@ public class perfectTspNaiv{
 	ArrayList<LinienSegment> FinalTspK = new ArrayList<LinienSegment>();
 
 	
-	public void execute(List<Punkt> clusters, ArrayList<LinienSegment> DelaunayK) {
+	public void execute(List<Punkt> clusters, List<LinienSegment> DelaunayK) {
 			
 		double[][] Adj = setupAdjMatrix(clusters , DelaunayK);
 		
@@ -42,7 +44,7 @@ public class perfectTspNaiv{
 				
 	}
 
-	private double[][] setupAdjMatrix(List<Punkt> cluster, ArrayList<LinienSegment> DelaunayK) {
+	private double[][] setupAdjMatrix(List<Punkt> cluster, List<LinienSegment> DelaunayK) {
 		int m = cluster.size();
 		boolean added = false;
 		double[][] AdjMatrix = new double[m][m];
@@ -654,6 +656,11 @@ public class perfectTspNaiv{
 	}
 	
 	public ArrayList<LinienSegment> finalEdges(double[][] currentBest){
+		
+		return FinalTspK;
+	}
+	
+	public List<LinienSegment> getFinal(){
 		
 		return FinalTspK;
 	}

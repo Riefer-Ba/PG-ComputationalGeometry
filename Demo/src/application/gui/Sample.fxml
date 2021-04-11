@@ -28,7 +28,7 @@
          <children>
             <Button mnemonicParsing="false" onAction="#load" text="Punkte laden" />
             <Button mnemonicParsing="false" onAction="#generate" text="Punkte zufällig generieren" />
-            <Button mnemonicParsing="false" onAction="#tsp_mst" text="tsp" />
+            <Button mnemonicParsing="false" onAction="#tsp_perfect" text="tsp" />
             <Button mnemonicParsing="false" onAction="#clear" text="Alles löschen" />
             <Button mnemonicParsing="false" onAction="#mst" text="mst" />
 
@@ -37,6 +37,7 @@
             <Button mnemonicParsing="false" onAction="#finalAlgo" text="Final Algo" />
             <ChoiceBox fx:id="choicebox" prefHeight="25.0" prefWidth="115.0" />
             <Button mnemonicParsing="false" onAction="#undo" text="undo" />
+            <Button mnemonicParsing="false" onAction="#kOrderTest" text="K-Order Test" />
          </children>
          <padding>
             <Insets bottom="10.0" />

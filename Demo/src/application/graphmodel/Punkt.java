@@ -13,7 +13,7 @@ public class Punkt{
     ArrayList <Punkt> reachable = new ArrayList<Punkt>();
     private boolean visited;
     private ArrayList<Punkt> nb = new ArrayList<Punkt>();
-   
+    int label;
     public Punkt(double x, double y){
         this.x=x;
         this.y=y;
@@ -101,5 +101,15 @@ public class Punkt{
 			return true;
 		}
 		return false;
+	}
+
+	public void setLabel(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+	public int getLabel() {
+		return label;
+		// TODO Auto-generated method stub
+		
 	}
 }

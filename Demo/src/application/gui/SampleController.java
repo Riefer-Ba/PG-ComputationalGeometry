@@ -20,11 +20,13 @@ import application.graphmodel.Dreieck;
 import application.graphmodel.Kmeans;
 import application.graphmodel.LinienSegment;
 import application.graphmodel.Mst_all;
+import application.graphmodel.Pnkt;
 import application.graphmodel.Point;
 import application.graphmodel.Position;
 import application.graphmodel.Punkt;
 import application.graphmodel.TspFinder;
 import application.graphmodel.clusterCentroid;
+import application.graphmodel.perfectTspNaiv;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -116,7 +118,67 @@ public class SampleController {
 	}
 	
 	@FXML
-	public void finalAlgo() {
+	public void kOrderTest() {
+		
+		ArrayList<Punkt> punkte = new ArrayList<Punkt>();
+		
+		for (Point p : graphs.punkte) { 
+			
+			
+			Punkt t = new Punkt(p.getX(), p.getY());
+			punkte.add(t);
+		}
+		ArrayList<Pnkt> pnkts = new ArrayList<Pnkt>();
+		
+		for (int i = 0; i< punkte.size();i++) {
+			
+			punkte.get(i).setLabel(i+1);
+			Pnkt pt = new Pnkt(punkte.get(i).getX(),punkte.get(i).getY(),punkte.get(i).getLabel());
+			pnkts.add(pt);
+		}
+		
+		for(Pnkt p : pnkts) {
+			
+			System.out.println(p.getN());
+		}
+		
+		ArrayList<LinienSegment> finalTour = finalAlgo();
+		for (LinienSegment l : finalTour) {
+			System.out.println("checkpoint loop");
+
+
+			Pnkt p1 = new Pnkt(l.getEndpkt1().getX(),l.getEndpkt1().getY(),l.getEndpkt1().getLabel());
+			Pnkt p2 = new Pnkt(l.getEndpkt2().getX(),l.getEndpkt2().getY(),l.getEndpkt2().getLabel());
+			
+			for (Pnkt p : pnkts) {
+				
+				if ( p == p1) {
+					
+					for (Pnkt q : pnkts) {
+						
+						if (q == p2) {
+							
+							int order1 = Pnkt.delaunayOrd(pnkts, p.getN(), q.getN());
+							if(order1 >= 1) {
+								
+								System.out.println("higher order Kantee!!!!!!!!!!!!!!!!!");
+						}
+						
+					} 
+				}
+			}
+			//int order = Pnkt.delaunayOrd(pnkts, p1.getN(), p2.getN());
+			//int order = Pnkt.delaunayOrd(pnkts, test1.getN(), test2.getN());
+		//	if(order >= 1) {
+				
+			//	System.out.println("higher order Kantee!!!!!!!!!!!!!!!!!");
+			}
+			
+		}
+	}
+	
+	@FXML
+	public ArrayList<LinienSegment> finalAlgo() {
 		world.getChildren().remove(tspEdges);
 		tspEdges.getChildren().clear();
 		world.getChildren().remove(finalTsp);
@@ -158,6 +220,7 @@ public class SampleController {
 		}
 		
 		world.getChildren().add(finalTsp);
+		return finalStep.getTsp();
 	}
 	
 	@FXML
@@ -189,6 +252,7 @@ public class SampleController {
 			Punkt y = l.getEndpkt2();
 			
 			Line g = new Line(x.getX(),x.getY(), y.getX(), y.getY());
+			g.setStroke(Color.RED);
 			globalMst.getChildren().add(g);
 			
 		}
@@ -526,6 +590,54 @@ public class SampleController {
 		
 		world.getChildren().add(tspEdges);
 		return tspClusters;
+	}
+	
+	
+	@FXML
+	public void tsp_perfect() {
+		
+		world.getChildren().remove(tspEdges);
+		world.getChildren().remove(mstEdges);
+		mstEdges.getChildren().clear();
+		world.getChildren().remove(finalTsp);
+		finalTsp.getChildren().clear();
+		tspEdges.getChildren().clear();
+		delEdges.getChildren().clear();
+		world.getChildren().remove(delEdges);
+		List<List<Point>> cll = globalCluster;
+		List<List<Punkt>> cl = new ArrayList<List<Punkt>>();
+		//List<LinkedList<Punkt>> tspClusters = new ArrayList<LinkedList<Punkt>>();
+		
+		for (List<Point> cluster : cll) {								// PROVISORISCH: Pointliste -> Punktliste
+			ArrayList<Punkt> cls = new ArrayList<Punkt>();
+			for (Point p : cluster) {
+				
+				Punkt x = new Punkt(p.getX(),p.getY());
+				cls.add(x);
+			}
+		
+			cl.add(cls);
+		}
+		
+		List<List<LinienSegment>> delK = triangulation();
+
+		for(int i = 0; i < cl.size();i++) {							//für jedes cluster einzelne tsp berechnung
+			
+			perfectTspNaiv pt = new perfectTspNaiv();
+			
+			pt.execute(cl.get(i), delK.get(i));
+
+			for (LinienSegment lin : pt.getFinal()) {
+				
+				
+				Line l = new Line(lin.getEndpkt1().getX(),lin.getEndpkt1().getY(), lin.getEndpkt2().getX(), lin.getEndpkt2().getY());
+				tspEdges.getChildren().add(l);
+			}
+			
+		}
+		
+		world.getChildren().add(tspEdges);
+		//return tspClusters;
 	}
 			
 

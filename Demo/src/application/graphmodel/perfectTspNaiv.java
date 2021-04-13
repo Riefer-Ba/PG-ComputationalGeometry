@@ -1,5 +1,3 @@
-package application.graphmodel;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +5,9 @@ public class perfectTspNaiv {
 	ArrayList<double[][]> allTsp = new ArrayList<double[][]>();
 	ArrayList<LinienSegment> FinalTspK = new ArrayList<LinienSegment>();
 	
+workbranch-simon
 	public void execute(List<Punkt> clusters, List<LinienSegment> DelaunayK) {
+
 		
 		double[][] Adj = setupAdjMatrix(clusters , DelaunayK);
 		
@@ -334,7 +334,9 @@ public class perfectTspNaiv {
 		
 	}
 
+
 	private double[][] setupAdjMatrix(List<Punkt> cluster, List<LinienSegment> DelaunayK) {
+
 		int m = cluster.size();
 		boolean added = false;
 		double[][] AdjMatrix = new double[m][m];
@@ -404,6 +406,8 @@ public class perfectTspNaiv {
 	private double[][] erzeugeAdj(int[][] indexTour) {
 		int m = indexTour.length;
 		double[][] AdjMatrix = new double[m][m];
+
+
 		
 		//erst mit 0en füllen...
 		for (int i=0 ; i < m ; i++) { 
@@ -434,13 +438,13 @@ public class perfectTspNaiv {
 			}
 		}
 	}
-	
-	public ArrayList<LinienSegment> finalEdges(double[][] currentBest){
-		
-		return FinalTspK;
-	}
-	
+
 	public ArrayList<LinienSegment> getFinal() {
+    return FinalTspK;
+  }
+
+	public ArrayList<LinienSegment> finalEdges(double[][] currentBest){
+
 		
 	return FinalTspK;
 	}

@@ -48,7 +48,7 @@ public class perfectTspNaiv {
 			}
 		}
 		
-		for (int i=0 ; i < m ; i++) {	//reicht es hier nur für die erste reihe den algo? sind damit alle fälle drin?
+		for (int i=0 ; i < m ; i++) {	//reicht es hier nur fÃ¼r die erste reihe den algo? sind damit alle fÃ¤lle drin?
 			for (int k=i+1 ; k < m ; k++) { //i+1 gehen auf hauptdiagonale aber nur im ersten schritt
 			
 				if(visitedB[i][k] == false) {
@@ -56,9 +56,9 @@ public class perfectTspNaiv {
 					visitedB[i][k] = true;
 					
 					if (adj[i][k]  == 1) {
-						reset=false; //für tour abbruch
+						reset=false; //fÃ¼r tour abbruch
 						
-						//nicht besuchte Kante einfügen. 
+						//nicht besuchte Kante einfÃ¼gen. 
 						for(p=0 ;p< m; p++) {
 							if(indexTour[p][0] == 0 && indexTour[p][1] == 0) {
 								
@@ -70,9 +70,9 @@ public class perfectTspNaiv {
 								break;
 							}
 						}
-						//Testen ob eingefügte Kante gültig.
+						//Testen ob eingefÃ¼gte Kante gÃ¼ltig.
 						//neue Kante verletzt tsp eigenschaften. rausnehmen
-						if(visitedN[i] >2 || visitedN[k] > 2) {
+						if(visitedN[i] >2 || visitedN[k] > 2 || testeAufRundTour(visitedN, p, indexTour) == true) {
 							//reset
 						//	System.out.println("abbruch Punkt mehr als 2x verwendet");		
 							
@@ -80,7 +80,7 @@ public class perfectTspNaiv {
 							for (int h=i; h < m ; h++) {
 								for (int j=k ; j < m ; j++) {
 									if(visitedB[h][j] == false) {	//&& adj[h][j]  == 1 bessere Laufzeit. Problem: unten rechts keine 1
-										//weiter mit nächstem element. tour noch möglich
+										//weiter mit nÃ¤chstem element. tour noch mÃ¶glich
 										//alle 3 Hilfsstrukturen updaten.
 							 			visitedN[indexTour[p][0]]--;
 							 			visitedN[indexTour[p][1]]--;
@@ -94,16 +94,38 @@ public class perfectTspNaiv {
 									break;
 								}
 							}
-							
+
 //							if (reset == false) {
-//								//derzeitige Tour kann nicht mehr gültig werden.
+//								//derzeitige Tour kann nicht mehr gÃ¼ltig werden.
 //								System.out.println("in reset false");
 //								
 //								//hier auch ein reset
 //							}
 						}
+//						else if (p > 1) {
+//							boolean rund= testeAufRundTour(visitedN, p);
+//							 	if(rund == true) {
+//							 		for (int h=i; h < m ; h++) {
+//										for (int j=k ; j < m ; j++) {
+//											if(visitedB[h][j] == false) {	//&& adj[h][j]  == 1 bessere Laufzeit. Problem: unten rechts keine 1
+//												//weiter mit nÃ¤chstem element. tour noch mÃ¶glich
+//												//alle 3 Hilfsstrukturen updaten.
+//									 			visitedN[indexTour[p][0]]--;
+//									 			visitedN[indexTour[p][1]]--;
+//												indexTour[p][0] = 0; 
+//									 			indexTour[p][1] = 0;
+//									 			reset=true;
+//									 			break;
+//											}
+//										}
+//										if(reset == true) {
+//											break;
+//										}
+//									}
+//							 	}
+//							}
 						
-						//neue Kante gültig. Teste ob m-1 Kanten in index Tour sind.
+						//neue Kante gÃ¼ltig. Teste ob m-1 Kanten in index Tour sind.
 						else if( indexTour[m-1][0] == 0 && indexTour[m-1][1] == 0  ) {
 							if( indexTour[m-2][0] != 0 || indexTour[m-2][1] != 0) {
 
@@ -127,14 +149,14 @@ public class perfectTspNaiv {
 									if( indexTour[z][0] == v1 && indexTour[z][1] == v2) {
 										//System.out.println("Kante schon drinne");
 										v1 =m+3;
-										break; //TODO break neu eingeführt, testen
+										break; //TODO break neu eingefÃ¼hrt, testen
 									}
 								}
 								//TODO check ob subtouren gefunden.
 								
 								//gibt es nicht. oder in sich geschlossen
 								if(v1 == m+3 || v2== m+3 || v2 == v1 || adj[v1][v2]  == 0) {
-							//		System.out.println("Fehler beim zusammenführen der letzten 2 Pkte, reset tour"); 
+							//		System.out.println("Fehler beim zusammenfÃ¼hren der letzten 2 Pkte, reset tour"); 
 
 						 			visitedN[indexTour[p][0]]--;
 						 			visitedN[indexTour[p][1]]--;
@@ -174,16 +196,22 @@ public class perfectTspNaiv {
 								//gibt es aber kante bereits in der Tour.
 								else{
 								//System.out.println("Tour gefunden");
-								//letzten Punkt einfügen
+								//letzten Punkt einfÃ¼gen
 								visitedN[v1]++;
 								visitedN[v2]++;
 								indexTour[m-1][0]= v1;
 								indexTour[m-1][1]= v2;
 								
-								double[][] currentTour = erzeugeAdj(indexTour); //auch möglich nur die aktuell beste Tour zu speichern
-								allTsp.add(currentTour);
+								double[][] currentTour = erzeugeAdj(indexTour); //auch mÃ¶glich nur die aktuell beste Tour zu speichern
 								
-								//und wieder rausnehmen, die letzten 2! einträge
+								
+								if( ValidTourCheck(indexTour) ==true ) {
+									allTsp.add(currentTour); //TODO
+								}
+								
+
+								
+								//und wieder rausnehmen, die letzten 2! eintrÃ¤ge
 								
 								visitedN[indexTour[m-1][0]]--;
 								visitedN[indexTour[m-1][1]]--;
@@ -234,8 +262,8 @@ public class perfectTspNaiv {
 					//	System.out.println("ist false. suche next true");
 
 						if(k == m-1 && i == m-2) { //hier abbruch bedingung, wenn keine Tour mehr gefunden werden kann 
-							// auch schon früher als unten rechts
-							//besser länge index Tour und noch mögliche kanten (übrig geblieben ==1 -1, wegen letztem schritt)
+							// auch schon frÃ¼her als unten rechts
+							//besser lÃ¤nge index Tour und noch mÃ¶gliche kanten (Ã¼brig geblieben ==1 -1, wegen letztem schritt)
 						//	System.out.println("Tour abbgebrochen.");
 							
 							for(int z = 0 ;z< m; z++) {
@@ -279,7 +307,7 @@ public class perfectTspNaiv {
 					
 					if(k == m-1 && i == m-2) {						
 						if( indexTour[0][0] == m-2 && indexTour[0][1] == m-1) {
-							return true; // Sonderfall erstes Element ist das über der Hauptdiagonalen
+							return true; // Sonderfall erstes Element ist das Ã¼ber der Hauptdiagonalen
 						}
 
 //						System.out.println("remove letztes != 0 element aus index Tour");
@@ -337,6 +365,86 @@ public class perfectTspNaiv {
 	}
 
 
+	private boolean ValidTourCheck(int[][] indexTour) {
+		
+		int m = indexTour.length;
+		boolean[] visited = new boolean[m];
+		
+		for(int i=0; i< m; i++) {
+			visited[i] = false;
+		}
+		
+		int current = indexTour[0][1];
+		visited[0] =true;
+		boolean found;
+		
+		for(int i=1; i< m; i++) {	
+			found = false;
+			
+			for(int j=0; j< m; j++) {
+				if( visited[j] == false) {
+					
+					if( indexTour[j][0] == current) {
+						visited[j] = true;
+						current = indexTour[j][1];
+						found = true;
+						break;
+					}
+					else if(indexTour[j][1] == current) {
+						visited[j] = true;
+						current = indexTour[j][0];
+						found = true;
+						break;
+					}
+					
+				}
+			}
+			
+			if( found == false) {
+				return false;
+			}
+		}
+		
+		if( current != indexTour[0][0]) {
+			
+		}
+		
+		return true;
+	}
+
+	private void printIndexTour(int[][] indexTour) {
+		for(int i=0; i< indexTour.length; i++) {
+			System.out.println(" "+indexTour[i][0] +" "+indexTour[i][1]);
+		}
+	}
+	
+	private void printVisit(int[] visitedN) {
+		for(int i=0; i< visitedN.length; i++) {
+			System.out.println(+i +": "+visitedN[i]);
+		}
+	}
+	
+	private boolean testeAufRundTour(int[] visitedN, int p,int[][] indexTour) {
+		int counter=0;
+		if( p<2 ) {
+			return false;
+		}
+		for (int i=0 ; i < visitedN.length; i++) {
+			if(visitedN[i] == 2 ) {
+				counter++;
+			}
+		}
+		if(counter == p+1) {
+			System.out.println("Kreis gefunden");
+			printVisit(visitedN);
+			System.out.println("@@@@@");
+			printIndexTour(indexTour);
+			return true;
+		}
+		
+		return false;
+	}
+
 	private double[][] setupAdjMatrix(List<Punkt> cluster, List<LinienSegment> DelaunayK) {
 
 		int m = cluster.size();
@@ -362,7 +470,7 @@ public class perfectTspNaiv {
 	}
 	
 	private void bestTour(List<Punkt> cluster) {
-		// TODO test für n>4		
+		// TODO test fÃ¼r n>4		
 		double newLaenge, laengeCurrentBest =999999;
 		int indexBesteTour =0;	
 	
@@ -413,7 +521,7 @@ public class perfectTspNaiv {
 
 
 		
-		//erst mit 0en füllen...
+		//erst mit 0en fÃ¼llen...
 		for (int i=0 ; i < m ; i++) { 
 			for (int j=0 ; j < m ; j++) {
 				AdjMatrix[i][j] = 0;

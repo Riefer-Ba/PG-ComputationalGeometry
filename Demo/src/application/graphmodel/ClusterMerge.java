@@ -12,8 +12,11 @@ public class ClusterMerge {
 	
 	public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, ArrayList<double[][]> tsp) {
 		
-		for (int i=0; i< clusters.size() ;i++) { //-1?
-
+		mst.get(0).SortMstLaenge(mst);
+		int m = clusters.size() -1 ;
+		for (int i=0; i< m ;i++) { //-1?
+			
+			
 		LinienSegment mstEdge =  findClosestCluster(clusters, mst, tsp);
 //		//verbindet Cluster, behaltet Tsp Eigenschaften bei.
 

@@ -1,17 +1,19 @@
+package application.graphmodel;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class perfectTspNaiv {
 	ArrayList<double[][]> allTsp = new ArrayList<double[][]>();
 	ArrayList<LinienSegment> FinalTspK = new ArrayList<LinienSegment>();
+	double[][] FinalAdj;
 	
-workbranch-simon
 	public void execute(List<Punkt> clusters, List<LinienSegment> DelaunayK) {
 
 		
 		double[][] Adj = setupAdjMatrix(clusters , DelaunayK);
 		
-		printAdj(Adj);		//for test
+	//	printAdj(Adj);		//for test
 		
 		if(clusters.size() > 3) {
 			getTspTour(clusters, Adj);
@@ -389,6 +391,8 @@ workbranch-simon
 
 		System.out.println("beste Tour hat Laenge: "+ laengeCurrentBest);
 		LsAusAdjMatrix(allTsp.get(indexBesteTour), cluster);
+		
+		FinalAdj = allTsp.get(indexBesteTour);
 	}	
 	
 	private void LsAusAdjMatrix(double[][] currentBest, List<Punkt> clusters) {
@@ -438,14 +442,16 @@ workbranch-simon
 			}
 		}
 	}
+	
+	public double[][] getFinalAdj() {
+		return FinalAdj;
+	}
 
 	public ArrayList<LinienSegment> getFinal() {
-    return FinalTspK;
-  }
+		return FinalTspK;
+	}
 
-	public ArrayList<LinienSegment> finalEdges(double[][] currentBest){
-
-		
-	return FinalTspK;
+	public ArrayList<LinienSegment> finalEdges(double[][] currentBest){	
+		return FinalTspK;
 	}
 }

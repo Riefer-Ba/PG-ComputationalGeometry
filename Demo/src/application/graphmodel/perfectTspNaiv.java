@@ -70,7 +70,7 @@ public class perfectTspNaiv {
 						//neue Kante verletzt tsp eigenschaften. rausnehmen
 						if(visitedN[i] >2 || visitedN[k] > 2) {
 							//reset
-							System.out.println("abbruch Punkt mehr als 2x verwendet");		
+						//	System.out.println("abbruch Punkt mehr als 2x verwendet");		
 							
 							//wenn es noch ein adj[i][k] gibt, das nicht besucht wurde, letztes element rausnehmen.
 							for (int h=i; h < m ; h++) {
@@ -121,7 +121,7 @@ public class perfectTspNaiv {
 								//checken ob Kante schon drinne ist.
 								for (int z =0; z < m; z++) {
 									if( indexTour[z][0] == v1 && indexTour[z][1] == v2) {
-										System.out.println("Kante schon drinne");
+										//System.out.println("Kante schon drinne");
 										v1 =m+3;
 										break; //TODO break neu eingeführt, testen
 									}
@@ -130,7 +130,7 @@ public class perfectTspNaiv {
 								
 								//gibt es nicht. oder in sich geschlossen
 								if(v1 == m+3 || v2== m+3 || v2 == v1 || adj[v1][v2]  == 0) {
-									System.out.println("Fehler beim zusammenführen der letzten 2 Pkte, reset tour"); 
+							//		System.out.println("Fehler beim zusammenführen der letzten 2 Pkte, reset tour"); 
 
 						 			visitedN[indexTour[p][0]]--;
 						 			visitedN[indexTour[p][1]]--;
@@ -232,7 +232,7 @@ public class perfectTspNaiv {
 						if(k == m-1 && i == m-2) { //hier abbruch bedingung, wenn keine Tour mehr gefunden werden kann 
 							// auch schon früher als unten rechts
 							//besser länge index Tour und noch mögliche kanten (übrig geblieben ==1 -1, wegen letztem schritt)
-							System.out.println("Tour abbgebrochen.");
+						//	System.out.println("Tour abbgebrochen.");
 							
 							for(int z = 0 ;z< m; z++) {
 								if(indexTour[z][0] == 0 && indexTour[z][1] == 0) {

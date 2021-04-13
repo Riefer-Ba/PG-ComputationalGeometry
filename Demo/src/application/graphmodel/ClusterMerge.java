@@ -26,6 +26,7 @@ public class ClusterMerge {
 		for (int i=0; i<clusters.size(); i++) {
 			setupAdjMatrix(clusters.get(i), tsp.get(i));
 		}
+		mst.get(0).SortMstLaenge(mst);
 
 		int m = clusters.size() -1 ;
 		

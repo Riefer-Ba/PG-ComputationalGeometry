@@ -619,8 +619,10 @@ public class SampleController {
 			cl.add(cls);
 		}
 		
+		
 		List<List<LinienSegment>> delK = triangulation();
 
+		delEdges.getChildren().clear();
 		for(int i = 0; i < cl.size();i++) {							//für jedes cluster einzelne tsp berechnung
 			
 			perfectTspNaiv pt = new perfectTspNaiv();

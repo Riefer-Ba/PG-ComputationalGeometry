@@ -155,6 +155,11 @@ public class ClusteringRandomKmeans {
 	public List<List<Point>> rec (List<List<Point>> cFinal){
 		boolean trigger = false;
 		
+        System.out.println("wie groß sollen die Cluster maximal sein?");
+		Scanner in = new Scanner(System.in);
+        int maxGroese = in.nextInt();
+        System.out.println("Maximalgröße ist: " + maxGroese);
+		
 		
 		do {
 			List<List<Point>> newCl = new ArrayList<List<Point>>();
@@ -164,7 +169,7 @@ public class ClusteringRandomKmeans {
 			while (iterator.hasNext()) {
 			
 				List<Point> vgl = iterator.next();
-				if (vgl.size() >8) {
+				if (vgl.size() >maxGroese) {
 				
 					
 					//tmp = vgl;
@@ -191,7 +196,7 @@ public class ClusteringRandomKmeans {
 			
 			for (List<Point> cluster : clustersFinal) {
 				
-				if (cluster.size()>8){
+				if (cluster.size()> maxGroese){
 					System.out.println("zu großes cluster");
 					trigger = false;
 					break;

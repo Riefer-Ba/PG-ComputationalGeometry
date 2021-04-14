@@ -9,11 +9,21 @@ public class DelaunayNaiv2 {
 	
 	public void execute(ArrayList<Punkt> p) {
 		init(p);
-		//Laufzeit verbessern duplikate löschen aber wöre immer noch zu langsam
+		//Laufzeit verbessern duplikate lÃ¶schen aber wÃ¶re immer noch zu langsam
 		ArrayList<Dreieck> toDelete = testAll(p);
 		DeleteNonDelaunay(toDelete);
 		UniqueEdges();
 		//printK();
+	}
+	
+	public void fullGraph(ArrayList<Punkt> p) {
+		for (int i=0 ; i < p.size() ; i++) {
+			for (int k= i+1 ; k < p.size(); k++) {
+				LinienSegment l = new LinienSegment(p.get(i), p.get(k));
+				DelaunayK.add(l);
+			}
+		}
+		
 	}
 	
 	private void init(ArrayList<Punkt> pList) {
@@ -113,8 +123,8 @@ public class DelaunayNaiv2 {
 		return false;
 	}
 			
-		//platzhaltermethode für später
-	public void naivEinfügen(Punkt pi, ArrayList<Punkt> p) {
+		//platzhaltermethode fÃ¼r spÃ¤ter
+	public void naivEinfÃ¼gen(Punkt pi, ArrayList<Punkt> p) {
 		for(int i=0; i < p.size(); i++){
 			for(int j=1; j < p.size() ; j++ ) {
 				Dreieck dNew = new Dreieck(pi, p.get(i),p.get(j));

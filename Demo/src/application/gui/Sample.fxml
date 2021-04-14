@@ -27,12 +27,13 @@
       <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
             <Button mnemonicParsing="false" onAction="#load" text="Punkte laden" />
-            <Button mnemonicParsing="false" onAction="#generate" text="Punkte zufällig generieren" />
+            <Button mnemonicParsing="false" onAction="#generate" text="Punkte random" />
             <Button mnemonicParsing="false" onAction="#tsp_perfect" text="tsp" />
             <Button mnemonicParsing="false" onAction="#clear" text="Alles löschen" />
             <Button mnemonicParsing="false" onAction="#mst" text="mst" />
 
             <Button mnemonicParsing="false" onAction="#triangulation" text="delaunay" />
+            <Button mnemonicParsing="false" onAction="#completeGraph" text="full" />
             <Button mnemonicParsing="false" onAction="#clustering" text="cluster" />
             <Button mnemonicParsing="false" onAction="#finalAlgo" text="Final Algo" />
             <ChoiceBox fx:id="choicebox" prefHeight="25.0" prefWidth="115.0" />

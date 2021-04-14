@@ -926,6 +926,50 @@ public class SampleController {
 		return triKanten;
 	}
 	
+	@FXML
+	public List<List<LinienSegment>> completeGraph() {
+		world.getChildren().remove(tspEdges);
+		world.getChildren().remove(mstEdges);
+		mstEdges.getChildren().clear();
+		world.getChildren().remove(finalTsp);
+		finalTsp.getChildren().clear();
+		tspEdges.getChildren().clear();
+		delEdges.getChildren().clear();
+		world.getChildren().remove(delEdges);
+		List<List<LinienSegment>> triKanten = new ArrayList<List<LinienSegment>>();
+		
+		List<List<Point>> cl = globalCluster;
+		for (int z = 0; z<cl.size(); z++) {
+			
+			
+			DelaunayNaiv2 del = new DelaunayNaiv2();
+			ArrayList<Punkt> pts = new ArrayList<Punkt>();
+		
+			for(int i = 0; i<cl.get(z).size();i++) {	
+				pts.add(new Punkt(cl.get(z).get(i).getX(), cl.get(z).get(i).getY()));
+			}
+		
+			del.fullGraph(pts);
+			ArrayList<LinienSegment> edges = del.finalEdges();
+			triKanten.add(edges);
+
+			for (int i = 0; i<edges.size(); i++) {
+				
+				Punkt x = edges.get(i).getEndpkt1();
+				Punkt y = edges.get(i).getEndpkt2();
+				
+				Line l = new Line(x.getX(), x.getY(), y.getX(), y.getY());
+				
+				delEdges.getChildren().add(l);
+			
+			}
+			
+		
+		}
+		world.getChildren().addAll(delEdges);
+		return triKanten;
+	}
+	
 	
 	@FXML
 	public void handleOnMousePressed(MouseEvent event){

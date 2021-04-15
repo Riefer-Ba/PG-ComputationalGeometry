@@ -34,8 +34,8 @@ public class perfectTspNaiv {
 
 	private boolean getTspTour(List<Punkt> cluster, double[][] adj) {
 		int m = cluster.size(); 		
-		int[][] indexTour = new int[m][2]; //speichert die Tsp Kanten als 2 Pkte 
-		int[] visitedN = new int[m];
+		int[][] indexTour = new int[m][2]; //speichert die Tsp Kanten als 2 Int. 0 3 = LinienSegment bestehend aus 0 und 3tem Punkt des Clusters
+		int[] visitedN = new int[m];	//als Abbruchbedingung. Punkt kann nicht mehr als 2 Nachbarn haben
 		boolean[][] visitedB = new boolean[m][m];
 		int p;
 		boolean reset =false;
@@ -52,8 +52,8 @@ public class perfectTspNaiv {
 			}
 		}
 		
-		for (int i=0 ; i < m ; i++) {	//reicht es hier nur für die erste reihe den algo? sind damit alle fälle drin?
-			for (int k=i+1 ; k < m ; k++) { //i+1 gehen auf hauptdiagonale aber nur im ersten schritt
+		for (int i=0 ; i < m ; i++) {
+			for (int k=i+1 ; k < m ; k++) { //i+1, da Werte unter der oberen Hauptdiagonale irrelevant.
 			
 				if(visitedB[i][k] == false) {
 					
@@ -124,10 +124,8 @@ public class perfectTspNaiv {
 									if( indexTour[z][0] == v1 && indexTour[z][1] == v2) {
 										//System.out.println("Kante schon drinne");
 										v1 =m+3;
-										break; //TODO break neu eingeführt, testen
 									}
 								}
-								//TODO check ob subtouren gefunden.
 								
 								//gibt es nicht. oder in sich geschlossen
 								if(v1 == m+3 || v2== m+3 || v2 == v1 || adj[v1][v2]  == 0) {
@@ -152,7 +150,7 @@ public class perfectTspNaiv {
 							 			
 							 			int leave =0;
 										for (int h= i ; h < m ; h++) {
-											for (int o= 1 ; o < m ; o++) { //ree aufpassen, was o ist!
+											for (int o= 1 ; o < m ; o++) { 
 												if( h == i && leave ==0) {
 													o=k;
 													leave++;
@@ -177,7 +175,7 @@ public class perfectTspNaiv {
 								indexTour[m-1][0]= v1;
 								indexTour[m-1][1]= v2;
 								
-								double[][] currentTour = erzeugeAdj(indexTour); //auch möglich nur die aktuell beste Tour zu speichern
+								double[][] currentTour = erzeugeAdj(indexTour); //auch möglich nur die aktuell beste Tour zu speichern, bei Speicherprob.
 								
 								
 								if( ValidTourCheck(indexTour) ==true ) { //checkt ob es keine Subtouren gibt.
@@ -215,7 +213,7 @@ public class perfectTspNaiv {
 								//und noch reset bool ab hier
 								int leave =0;
 								for (int h= i ; h < m ; h++) {
-									for (int o= 1 ; o < m ; o++) { //ree aufpassen, was o ist!
+									for (int o= 1 ; o < m ; o++) {
 										if( h == i && leave ==0) {
 											o=k;
 											leave++;
@@ -245,7 +243,7 @@ public class perfectTspNaiv {
 								if(indexTour[z][0] == 0 && indexTour[z][1] == 0) {
 									
 									if( z == 0) {
-										//System.out.println("Sonderfall boop wenn oben rechts fertig.");
+										//System.out.println("Sonderfall wenn oben rechts. fertig.");
 										return true;
 									}
 									visitedN[indexTour[z-1][0]]--;
@@ -274,9 +272,6 @@ public class perfectTspNaiv {
 									break;
 								}
 							}
-							
-							//letztes obj in index tour finden. rausnehmen. alle visitedB danach auf false setzen.
-								// i und k reseten auf das element nach dem zu letzt rausgenommenen.
 						}
 					}
 					
@@ -284,9 +279,6 @@ public class perfectTspNaiv {
 						if( indexTour[0][0] == m-2 && indexTour[0][1] == m-1) {
 							return true; // Sonderfall erstes Element ist das über der Hauptdiagonalen
 						}
-
-//						System.out.println("remove letztes != 0 element aus index Tour");
-//						System.out.println("wenn letztes element 0 m-1 algo fertig.");
 
 						for(int z = 0 ;z< m; z++) {
 							if(indexTour[z][0] == 0 && indexTour[z][1] == 0) {
@@ -306,7 +298,7 @@ public class perfectTspNaiv {
 								//und noch reset bool ab hier
 								int leave =0;
 								for (int h= i ; h < m ; h++) {
-									for (int o= 1 ; o < m ; o++) { //ree aufpassen, was o ist!
+									for (int o= 1 ; o < m ; o++) {
 										if( h == i && leave ==0) {
 											o=k;
 											leave++;
@@ -387,19 +379,11 @@ public class perfectTspNaiv {
 		return true;
 	}
 
-	private void printIndexTour(int[][] indexTour) {
-		for(int i=0; i< indexTour.length; i++) {
-			System.out.println(" "+indexTour[i][0] +" "+indexTour[i][1]);
-		}
-	}
-	
-	private void printVisit(int[] visitedN) {
-		for(int i=0; i< visitedN.length; i++) {
-			System.out.println(+i +": "+visitedN[i]);
-		}
-	}
+
+
 	
 	private boolean testeAufRundTour(int[] visitedN, int p,int[][] indexTour) {
+		//ValidTourCheck, wenn komplette Tour. während des Algos reicht diese hier.
 		int counter=0;
 		if( p<2 ) {
 			return false;
@@ -411,9 +395,6 @@ public class perfectTspNaiv {
 		}
 		if(counter == p+1) {
 //			System.out.println("Kreis gefunden");
-//			printVisit(visitedN);
-//			System.out.println("@@@@@");
-//			printIndexTour(indexTour);
 			return true;
 		}
 		
@@ -444,11 +425,11 @@ public class perfectTspNaiv {
 		return AdjMatrix;
 	}
 	
-	private void bestTour(List<Punkt> cluster) {
-		// TODO test für n>4		
+	private void bestTour(List<Punkt> cluster) {	
 		double newLaenge, laengeCurrentBest =999999;
 		int indexBesteTour =0;	
 	
+		//checkt alle gefundenen tsp Touren und speichert immer die derzeitig beste. und returnt diese am ende
 		for (int i=0 ; i < allTsp.size() ; i++) {	
 			ArrayList<LinienSegment> tspSegmente = new ArrayList<LinienSegment>();
 			
@@ -472,13 +453,14 @@ public class perfectTspNaiv {
 				}
 		}
 
-		System.out.println("beste Tour hat Laenge: "+ laengeCurrentBest);
-		LsAusAdjMatrix(allTsp.get(indexBesteTour), cluster);
+	//	System.out.println("beste Tour hat Laenge: "+ laengeCurrentBest);
 		
+		LsAusAdjMatrix(allTsp.get(indexBesteTour), cluster); 	//das hier braucht man nur zum zeichnen der Touren. Finaler Algo nur langsamer dadurch.
 		FinalAdj = allTsp.get(indexBesteTour);
 	}	
 	
 	private void LsAusAdjMatrix(double[][] currentBest, List<Punkt> clusters) {
+
 		for (int i=0; i< currentBest.length ; i++) {
 			for (int j=i; j< currentBest.length ; j++) {
 				if (currentBest[i][j] == 1) {
@@ -486,10 +468,8 @@ public class perfectTspNaiv {
 				}
 			}
 		}
-		for (int i=0; i< FinalTspK.size(); i++) {
-			FinalTspK.get(i).printLs();
-		}
 	}
+	
 	private double[][] erzeugeAdj(int[][] indexTour) {
 		int m = indexTour.length;
 		double[][] AdjMatrix = new double[m][m];
@@ -536,5 +516,11 @@ public class perfectTspNaiv {
 
 	public ArrayList<LinienSegment> finalEdges(double[][] currentBest){	
 		return FinalTspK;
+	}
+	
+	private void printIndexTour(int[][] indexTour) {
+		for(int i=0; i< indexTour.length; i++) {
+			System.out.println(" "+indexTour[i][0] +" "+indexTour[i][1]);
+		}
 	}
 }

@@ -4,31 +4,34 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ClusterMerge {
+public class Cm {
 		ArrayList<LinienSegment> FinalTsp = new ArrayList<LinienSegment>();
 		ArrayList<double[][]> tspLinked = new ArrayList<double[][]>();
 
 		public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, ArrayList<double[][]> tsp) {
 			
-			System.out.println("start");
-			
+
+			mst.get(0).SortMstLaenge(mst);
 			int m = clusters.size() -1;
 			
+			
+	//		showcase(clusters, mst, tsp);
 			for (int i=0; i< m ;i++) {
 				System.out.println(i);
 			findClosestCluster(clusters, mst, tsp);
 //			//verbindet Cluster, behaltet Tsp Eigenschaften bei.
 
 			}
-			
 			FinalTsp(tsp, clusters);
+
+			printTour(tsp, clusters);
 		}
 
 		//TODO test
 		public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, List<LinkedList<Punkt>> tsp) {
 			
-			
-			int m = clusters.size();
+			mst.get(0).SortMstLaenge(mst);
+			int m = clusters.size() -1;
 			
 			for (int i=0; i<clusters.size(); i++) {
 				setupAdjMatrix(clusters.get(i), tsp.get(i));
@@ -43,14 +46,6 @@ public class ClusterMerge {
 			
 			FinalTsp(tspLinked, clusters);
 		}
-		
-
-		public void showcase(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, ArrayList<double[][]> tsp) {
-			//verbindet nur zwei Cluster mit einander. Zu Demo zwecken.
-			findClosestCluster(clusters, mst, tspLinked);
-			FinalTsp(tspLinked, clusters);
-		}
-
 
 		//TODO test if i und j passt
 		public void findClosestCluster(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, ArrayList<double[][]> tsp) {
@@ -97,8 +92,8 @@ public class ClusterMerge {
 							}
 						}
 					}
-					}
-				
+			}
+			
 			return a;
 		}
 		
@@ -110,10 +105,12 @@ public class ClusterMerge {
 			
 			a = FixIndex(clusters.get(i), i, mstEdge.endpkt1);
 			b = FixIndex(clusters.get(j), j, mstEdge.endpkt2);
+
+			
+			if(clusters.get(j).size() > 2 && clusters.get(i).size() > 2) {
 			
 			Punkt[] p1=  zweiNachbarn(i, a, tsp, clusters, mstEdge.endpkt1);		
 			Punkt[] p2=  zweiNachbarn(j, b, tsp, clusters, mstEdge.endpkt2);		
-			
 			
 			LinienSegment m11 = new LinienSegment(mstEdge.endpkt1, p1[0]);
 			LinienSegment m22 = new LinienSegment(mstEdge.endpkt1, p1[1]);
@@ -124,10 +121,6 @@ public class ClusterMerge {
 			LinienSegment c[] = candidate(p1, p2, mstEdge); 
 			c1 = c[0];
 			c2 = c[1];
-			
-			
-			
-			System.out.println("%%%%%%%%%%");
 			
 			if (c1 != null  && c2 != null) {
 				g0= c1.gewicht - m11.gewicht - m12.gewicht;
@@ -156,15 +149,10 @@ public class ClusterMerge {
 				return true;
 			}
 			else if (c2 == null && c1 ==null){
-				System.out.println("fuck me");
+				System.out.println("F");
 			}
-			
-			
-			System.out.println("fuck");
-			
+		}		
 			return false;
-			
-
 		}
 		
 		public int FixIndex (List<Punkt> cluster , int i, Punkt p) {
@@ -173,14 +161,13 @@ public class ClusterMerge {
 			for(int q=0 ; q < cluster.size(); q++) {
 				if( cluster.get(q).samePoint(p) == true) {
 					a=q;
-					break; //TODO break?
+					break;
 				}
 			}
 			
 			return a;
 		}
 		
-		//TODO test
 		private void TspCombine(int i, int j, ArrayList<double[][]> tsp, List<List<Punkt>> clusters, LinienSegment bestEdge, LinienSegment mst) {
 			// TODO test
 			int a=-1,b=-1,c=-1,d=-1;
@@ -281,7 +268,6 @@ public class ClusterMerge {
 			clusters.add(temp);
 		}
 
-		//TODO test
 		private LinienSegment[] candidate(Punkt[] p1, Punkt[] p2, LinienSegment mst) {
 
 			LinienSegment m11 = new LinienSegment(mst.endpkt1, p1[0]);
@@ -291,7 +277,6 @@ public class ClusterMerge {
 			LinienSegment m12 = new LinienSegment(mst.endpkt2, p2[1]);
 
 			// in i und j die 2 endpkte finden tsp.get(i)
-			
 			//TODO test if richtigen Segmente
 			LinienSegment c11 = new LinienSegment(p1[0], p2[0]);
 			LinienSegment c12 = new LinienSegment(p1[0], p2[1]);
@@ -300,49 +285,52 @@ public class ClusterMerge {
 			LinienSegment c22 = new LinienSegment(p1[1], p2[1]);
 			
 			LinienSegment c[] = {null, null};
+			boolean c0 =false ,c1 = false;
 			
 			
-			 if( kreuzungsfreiBool(c11, mst) == true) {
-				// if(kreuzungsfreiBool(c11, m22) == true) {
-				//	 if(kreuzungsfreiBool(c11, m12) == true){
+			 if( kreuzungsfreiBool(c11, mst) == true && kreuzungsfreiBool(c11, m22) == true && kreuzungsfreiBool(c11, m12) == true) {
 						 c[0]= c11;
-						 System.out.println("c[0] =c11");
-				//	 }
-				// }
+						 c0=true;
+						 
 			 }
-			 else if( kreuzungsfreiBool(c12, mst) == true) {
-				// if(kreuzungsfreiBool(c12, m22) == true) {
-				//	 if(kreuzungsfreiBool(c12, m21) == true){
+			 if( kreuzungsfreiBool(c12, mst)  == true && kreuzungsfreiBool(c12, m21) == true && kreuzungsfreiBool(c12, m22) == true) {
+				 if( c0 ==false) {
+					 c[0]= c12;
+				 }
+				 else { //wenn beide gültig dann nimm die kürzere
+					 if( c11.gewicht < c12.gewicht) {
 						 c[0]= c12;
-						 System.out.println("c[0] =c12");
-				//	 }
-				// }
+						 System.out.println("saved");		//change back ti 11 oben 12 unten!!! TODO
+					 }
+					 else {
+						 c[0]= c11;
+					 }
+				 }
 			 }
-			 else {
-				 System.out.println("both crossing mst. or crossing wrong edge  c2:/");
-			 }
-					
 			 
-			 if( kreuzungsfreiBool(c21, mst) == true) {
-			//	 if(kreuzungsfreiBool(c21, m12) == true) {
-			//		 if(kreuzungsfreiBool(c21, m11) == true){
+			 if( kreuzungsfreiBool(c21, mst) == true && kreuzungsfreiBool(c21, m12) == true && kreuzungsfreiBool(c21, m11) == true) {
 						 c[1]= c21;
-						 System.out.println("c[1] =c21");
-			//		 }
-			//	 }
+						 c1= true;
+
 			 }
-			 else if( kreuzungsfreiBool(c22, mst) == true) {
-			//	 if(kreuzungsfreiBool(c22, m21) == true) {
-			//		 if(kreuzungsfreiBool(c22, m11) == true){
+			 if( kreuzungsfreiBool(c22, mst) == true && kreuzungsfreiBool(c22, m21) == true && kreuzungsfreiBool(c22, m11) == true) {
+				 if( c1 ==false) {
+					 c[1]= c22;
+				 }
+				 else { //wenn beide gültig dann nimm die kürzere
+					 if( c21.gewicht < c22.gewicht) {
 						 c[1]= c22;
-						 System.out.println("c[1] =c22");
-			//		 }
-			//	 }
+						 System.out.println("saved");
+					 }
+					 else {
+						 c[1]= c21;
+					 }
+				 }
 			 }
-			 else {
-				 System.out.println("both crossing mst. or worse  c1 :/");
-			 }
-			 
+//			 else {
+//				 System.out.println("both crossing mst. or worse  c1 :/");
+//			 }
+	 
 
 			return c;
 		}
@@ -370,11 +358,7 @@ public class ClusterMerge {
 			
 		}
 
-		//TODO test
 		private void FinalTsp(ArrayList<double[][]> tsp, List<List<Punkt>> clusters) {
-			System.out.println(tsp.size());
-			System.out.println(tsp.get(0).length);
-			printAdj(tsp.get(0));
 			for (int i=0; i< tsp.get(0).length ; i++) {
 				for (int j=i; j< tsp.get(0).length ; j++) {
 					if (tsp.get(0)[i][j] == 1) {
@@ -401,9 +385,10 @@ public class ClusterMerge {
 			return FinalTsp;
 		}
 		
-		
-		//TODO test
 		private void setupAdjMatrix(List<Punkt> cluster, LinkedList<Punkt> tsp) {
+
+			
+			
 			int m = cluster.size();
 			double[][] AdjMatrix = new double[m][m];
 			int a = 100,b = 100;
@@ -445,5 +430,86 @@ public class ClusterMerge {
 			AdjMatrix[b][a] = 1;
 			
 			tspLinked.add(AdjMatrix);
+		}
+		
+		
+		
+		
+		public void printTour(ArrayList<double[][]> tsp, List<List<Punkt>> clusters) {
+			int[][] indexTour = new int[tsp.size()][2];
+			
+			indexTour= createIndexTour(tsp.get(0));
+			ValidTourCheck(indexTour, clusters.get(0));
+			System.out.println(FinalTsp.get(0).TourLaenge(FinalTsp));
+		}
+		
+
+		
+		private int[][] createIndexTour(double[][] tsp) {
+			int[][] indexTour = new int[tsp.length][2];
+
+			for (int h =0; h < FinalTsp.size() ;h++) {
+				for (int g =h+1; g < FinalTsp.size() ;g++) {
+					
+					if(tsp[h][g] == 1) {
+						for(int z = 0 ;z< FinalTsp.size(); z++) {
+							if(indexTour[z][0] == 0 && indexTour[z][1] == 0) {
+								indexTour[z][0] =h;
+								indexTour[z][1] =g;
+								break;
+							}
+						}
+					}
+					
+				}
+			}
+			return indexTour;
+		}
+
+		private boolean ValidTourCheck(int[][] indexTour, List<Punkt> cluster) {
+			
+			int m = indexTour.length;
+			boolean[] visited = new boolean[m];
+			
+			for(int i=0; i< m; i++) {
+				visited[i] = false;
+			}
+			
+			int current = indexTour[0][1];
+			visited[0] =true;
+			boolean found;
+			
+			cluster.get(indexTour[0][1]).printPunkt();
+			
+			for(int i=1; i< m; i++) {	
+				found = false;
+				
+				for(int j=0; j< m; j++) {
+					if( visited[j] == false) {
+						
+						if( indexTour[j][0] == current) {
+							
+							visited[j] = true;
+							current = indexTour[j][1];
+							cluster.get(indexTour[j][1]).printPunkt();
+							found = true;
+							break;
+						}
+						else if(indexTour[j][1] == current) {
+							visited[j] = true;
+							current = indexTour[j][0];
+							cluster.get(indexTour[j][0]).printPunkt();
+							found = true;
+							break;
+						}
+						
+					}
+				}
+				if( found == false) {
+					return false;
+				}
+			}
+			
+			return true;
 		}
 }

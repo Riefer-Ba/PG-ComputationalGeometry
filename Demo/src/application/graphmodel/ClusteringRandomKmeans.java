@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
+
+import javafx.scene.control.TextField;
 
 public class ClusteringRandomKmeans {
 
@@ -13,15 +16,16 @@ public class ClusteringRandomKmeans {
 	List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
 	int k = Math.round(punkte.size()/4);
 	ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();	
+	int clSize;
 	
 	boolean bed;						
 	boolean init = false;
 	
-	public ClusteringRandomKmeans(List<Point> pts, boolean choice) {
+	public ClusteringRandomKmeans(List<Point> pts, boolean choice, int size) {
 		
 		this.punkte = pts;
 		this.bed = choice;
-		
+		this.clSize = size;
 	}
 	
 	
@@ -30,6 +34,7 @@ public class ClusteringRandomKmeans {
 		createKmeans(punkte, k);
 		init = true;
 		rec(clustersFinal);
+		postOpt();
 		
 	}
 	
@@ -155,11 +160,8 @@ public class ClusteringRandomKmeans {
 	public List<List<Point>> rec (List<List<Point>> cFinal){
 		boolean trigger = false;
 		
-        System.out.println("wie groß sollen die Cluster maximal sein?");
-		Scanner in = new Scanner(System.in);
-        int maxGroese = in.nextInt();
-        System.out.println("Maximalgröße ist: " + maxGroese);
 		
+
 		
 		do {
 			List<List<Point>> newCl = new ArrayList<List<Point>>();
@@ -169,11 +171,11 @@ public class ClusteringRandomKmeans {
 			while (iterator.hasNext()) {
 			
 				List<Point> vgl = iterator.next();
-				if (vgl.size() >maxGroese) {
+				if (vgl.size() >clSize) {
 				
 					
 					//tmp = vgl;
-					ClusteringRandomKmeans Temp = new ClusteringRandomKmeans(vgl, bed);
+					ClusteringRandomKmeans Temp = new ClusteringRandomKmeans(vgl, bed,clSize);
 					Temp.createKmeans(vgl,2);
 					List<List<Point>> tempCl = Temp.getClusters();
 				
@@ -196,8 +198,8 @@ public class ClusteringRandomKmeans {
 			
 			for (List<Point> cluster : clustersFinal) {
 				
-				if (cluster.size()> maxGroese){
-					System.out.println("zu großes cluster");
+				if (cluster.size()> clSize){
+					System.out.println("cluster gesplittet");
 					trigger = false;
 					break;
 					
@@ -260,6 +262,61 @@ public class ClusteringRandomKmeans {
 	
 	public List<List<Point>> getClusters(){
 		
+		return clustersFinal;
+	}
+	
+	
+	public List<List<Point>> postOpt(){
+		
+		
+		List<List<Point>> tempCl = getClusters();
+		
+		for (List<Point> cluster : tempCl) {
+			
+			if (cluster.size() < 3) {
+				
+				for(Point p : cluster) {
+					double nearest = 10000;
+					Point newP = p;
+					
+					for(Point t : punkte) {
+						
+						double dist = Math.sqrt(Math.pow(p.getX() - t.getX(),2) +  Math.pow(p.getY() - t.getY(),2));
+						if(dist < nearest && t != p && !cluster.contains(t)) {
+							
+							nearest = dist;
+							newP = t;	
+						}
+					}
+					//tempCl.get(cluster.indexOf(newP)).add(p);
+					
+					for (List<Point> clstr : tempCl) {
+						
+						if(clstr.contains(newP)) {
+							
+							clstr.add(p);
+						}
+					}
+				}
+				
+			}
+			
+		}
+		
+		Iterator <List<Point>> iterator = tempCl.iterator();
+		
+		while (iterator.hasNext()) {
+			
+			List<Point> delC = iterator.next();
+			
+			if(delC.size() < 3) {
+				
+				iterator.remove();
+			}
+			
+		}
+		
+		clustersFinal = tempCl;
 		return clustersFinal;
 	}
 }

@@ -9,11 +9,22 @@ public class DelaunayNaiv2 {
 	
 	public void execute(ArrayList<Punkt> p) {
 		init(p);
-		//Laufzeit verbessern duplikate löschen aber wöre immer noch zu langsam
 		ArrayList<Dreieck> toDelete = testAll(p);
 		DeleteNonDelaunay(toDelete);
 		UniqueEdges();
 		//printK();
+	}
+	
+	
+	//bei interesse high-order Kanten zu analysieren
+	public void fullGraph(ArrayList<Punkt> p) {
+		for (int i=0 ; i < p.size() ; i++) {
+			for (int k= i+1 ; k < p.size(); k++) {
+				LinienSegment l = new LinienSegment(p.get(i), p.get(k));
+				DelaunayK.add(l);
+			}
+		}
+		
 	}
 	
 	private void init(ArrayList<Punkt> pList) {
@@ -24,8 +35,7 @@ public class DelaunayNaiv2 {
 			
 			
 		}
-		
-		
+
 			for(int i=0; i < pList.size() ; i++ ) {
 				for(int j=1; j < pList.size() ; j++ ) {
 					for(int k=2; k < pList.size() ; k++ ) {
@@ -99,7 +109,6 @@ public class DelaunayNaiv2 {
 		}
 	}
 	
-	
 	private boolean testEdge(LinienSegment li) {
 		for (int j=0 ; j< DelaunayK.size(); j++) {
 			if ( !(li.sameEdge(DelaunayK.get(j) ))) {
@@ -111,17 +120,6 @@ public class DelaunayNaiv2 {
 		}
 		System.out.println("never here! error");
 		return false;
-	}
-			
-		//platzhaltermethode für später
-	public void naivEinfügen(Punkt pi, ArrayList<Punkt> p) {
-		for(int i=0; i < p.size(); i++){
-			for(int j=1; j < p.size() ; j++ ) {
-				Dreieck dNew = new Dreieck(pi, p.get(i),p.get(j));
-				DelaunayD.add(dNew);
-				
-			}
-		}
 	}
 
 	public void printK() {

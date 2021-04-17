@@ -9,7 +9,6 @@ public class Dreieck{
 		this.setEndpkt1(x);
 		this.endpkt2 = y;
 		this.endpkt3 = z;
-		// force CCW knoten relation? 
 	}
 	
 	public double radius() {
@@ -77,7 +76,7 @@ public class Dreieck{
 		return ls;	
 	}
 	
-	public double Flaecheninhalt(Dreieck d) { // für Test ob Pkt im Dreieck
+	public double Flaecheninhalt(Dreieck d) { // fÃ¼r Test ob Pkt im Dreieck
 		double e= (getEndpkt1().getX()*(endpkt2.getY()-endpkt3.getY()));
 		double z= (endpkt2.getX()*(endpkt3.getY()-getEndpkt1().getY()));
 		double dr=(endpkt3.getX()*(getEndpkt1().getY()-endpkt2.getY()));

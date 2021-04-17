@@ -184,7 +184,7 @@ public class SampleController {
 		world.getChildren().remove(finalTsp);
 		finalTsp.getChildren().clear();
 		ArrayList<LinienSegment> mst = mstGlobal();
-		List<LinkedList<Punkt>> tsps = tsp_mst();
+		ArrayList<double[][]> tsps = tsp_perfect();
 		List<List<Point>> cl = globalCluster;
 		List<List<Punkt>> clusters = new ArrayList<List<Punkt>>();
 		
@@ -594,7 +594,7 @@ public class SampleController {
 	
 	
 	@FXML
-	public void tsp_perfect() {
+	public ArrayList<double[][]> tsp_perfect() {
 		
 		world.getChildren().remove(tspEdges);
 		world.getChildren().remove(mstEdges);
@@ -606,6 +606,7 @@ public class SampleController {
 		world.getChildren().remove(delEdges);
 		List<List<Point>> cll = globalCluster;
 		List<List<Punkt>> cl = new ArrayList<List<Punkt>>();
+		ArrayList<double[][]> tsps = new ArrayList<double[][]>();
 		//List<LinkedList<Punkt>> tspClusters = new ArrayList<LinkedList<Punkt>>();
 		
 		for (List<Point> cluster : cll) {								// PROVISORISCH: Pointliste -> Punktliste
@@ -628,7 +629,7 @@ public class SampleController {
 			perfectTspNaiv pt = new perfectTspNaiv();
 			
 			pt.execute(cl.get(i), delK.get(i));
-
+			tsps.add(pt.getFinalAdj());
 			for (LinienSegment lin : pt.getFinal()) {
 				
 				
@@ -640,6 +641,7 @@ public class SampleController {
 		
 		world.getChildren().add(tspEdges);
 		//return tspClusters;
+		return tsps;
 	}
 			
 
@@ -904,6 +906,50 @@ public class SampleController {
 			}
 		
 			del.execute(pts);
+			ArrayList<LinienSegment> edges = del.finalEdges();
+			triKanten.add(edges);
+
+			for (int i = 0; i<edges.size(); i++) {
+				
+				Punkt x = edges.get(i).getEndpkt1();
+				Punkt y = edges.get(i).getEndpkt2();
+				
+				Line l = new Line(x.getX(), x.getY(), y.getX(), y.getY());
+				
+				delEdges.getChildren().add(l);
+			
+			}
+			
+		
+		}
+		world.getChildren().addAll(delEdges);
+		return triKanten;
+	}
+	
+	@FXML
+	public List<List<LinienSegment>> completeGraph() {
+		world.getChildren().remove(tspEdges);
+		world.getChildren().remove(mstEdges);
+		mstEdges.getChildren().clear();
+		world.getChildren().remove(finalTsp);
+		finalTsp.getChildren().clear();
+		tspEdges.getChildren().clear();
+		delEdges.getChildren().clear();
+		world.getChildren().remove(delEdges);
+		List<List<LinienSegment>> triKanten = new ArrayList<List<LinienSegment>>();
+		
+		List<List<Point>> cl = globalCluster;
+		for (int z = 0; z<cl.size(); z++) {
+			
+			
+			DelaunayNaiv2 del = new DelaunayNaiv2();
+			ArrayList<Punkt> pts = new ArrayList<Punkt>();
+		
+			for(int i = 0; i<cl.get(z).size();i++) {	
+				pts.add(new Punkt(cl.get(z).get(i).getX(), cl.get(z).get(i).getY()));
+			}
+		
+			del.fullGraph(pts);
 			ArrayList<LinienSegment> edges = del.finalEdges();
 			triKanten.add(edges);
 

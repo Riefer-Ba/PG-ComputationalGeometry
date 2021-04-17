@@ -6,23 +6,29 @@ import java.util.List;
 
 public class ClusterMerge {
 		ArrayList<LinienSegment> FinalTsp = new ArrayList<LinienSegment>();
-		ArrayList<double[][]> tspLinked = new ArrayList<double[][]>();
-
+		ArrayList<double[][]> tspLinked = new ArrayList<double[][]>();	
+		public ArrayList<Punkt> traverse = new ArrayList<Punkt>();
+		public double size;
 		public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, ArrayList<double[][]> tsp) {
+			
 
 			mst.get(0).SortMstLaenge(mst);
 			int m = clusters.size() -1;
 			
+			
+	//		showcase(clusters, mst, tsp);
 			for (int i=0; i< m ;i++) {
-			findClosestCluster(clusters, mst, tsp);				//verbindet Cluster, behaltet Tsp Eigenschaften bei.
+				System.out.println(i);
+			findClosestCluster(clusters, mst, tsp);
+//			//verbindet Cluster, behaltet Tsp Eigenschaften bei.
+
 			}
 			FinalTsp(tsp, clusters);
 
-			//nur zum speichern von Touren
 			printTour(tsp, clusters);
 		}
 
-		//  Merge mit Tsp-Approx
+		//TODO test
 		public void execute(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, List<LinkedList<Punkt>> tsp) {
 			
 			mst.get(0).SortMstLaenge(mst);
@@ -33,14 +39,16 @@ public class ClusterMerge {
 			}
 			
 			for (int i=0; i< m ;i++) {
+
 			 findClosestCluster(clusters, mst, tspLinked);
+//			//verbindet Cluster, behaltet Tsp Eigenschaften bei.
+
 			}
+			
 			FinalTsp(tspLinked, clusters);
-			//nur zum speichern von Touren
-			printTour(tspLinked, clusters);
 		}
 
-		
+		//TODO test if i und j passt
 		public void findClosestCluster(List<List<Punkt>> clusters, ArrayList<LinienSegment> mst, ArrayList<double[][]> tsp) {
 			
 			LinienSegment ConnectingMstEdge = null;
@@ -52,30 +60,36 @@ public class ClusterMerge {
 					ConnectingMstEdge = mst.get(i);
 					break;
 				}
-			}		
+				if( a[0] == 1 && i == mst.size()-1) System.out.println("ups");
+			}
+					
 			ConnectTsp(ConnectingMstEdge,a[1] , a[2], tsp, clusters);
 			ClusterCombine(a[1] , a[2] , clusters);
+			
 		}
 
 		
 		private int[] ConnectsTwoClusters(List<List<Punkt>> clusters, LinienSegment ls) {
-			//Test ob die beiden Endpkte der mst Kante nicht dem selben Cluster gehoeren
-
-			//a zum Ã¼bertragen von cluster indexen und bool ob Kriterien passen
+			//Test ob die beiden Endpkte NICHT dem selben Cluster gehÃ¶ren
+			//1.Cluster finden
 			int a[]= {0,0,0}; 
 			for( int i =0 ; i < clusters.size(); i++) {
 				
 				if ((ls.endpkt1.inCluster(clusters.get(i))) == true) {
 								
 					for( int j =0 ; j < clusters.size(); j++) {
-						if(i != j) {		//1. Cluster finden
+						if(i != j) {
+							
 							if ((ls.endpkt2.inCluster(clusters.get(j))) == true) {	
 								a[0] =1; a[1] = i; a[2] =j;
 								return a;
-							}				//2. Cluster finden
+							}
 							else if ((ls.endpkt2.inCluster(clusters.get(i))) == true) {	
 								return a;
 							}
+							
+							//2. Cluster finden
+
 							}
 						}
 					}
@@ -90,16 +104,18 @@ public class ClusterMerge {
 			int a=-7,b=-7;
 			LinienSegment c1,c2;
 			
-			//FixIndex da manchmal i und j beim Ã¼bergeben vertauscht wurden...
 			a = FixIndex(clusters.get(i), i, mstEdge.endpkt1);
 			b = FixIndex(clusters.get(j), j, mstEdge.endpkt2);
 
+			
+			if(clusters.get(j).size() > 2 && clusters.get(i).size() > 2) {
+			
 			Punkt[] p1=  zweiNachbarn(i, a, tsp, clusters, mstEdge.endpkt1);		
 			Punkt[] p2=  zweiNachbarn(j, b, tsp, clusters, mstEdge.endpkt2);		
 			
-			//die 4 Nachbarliniensegmente des mst Eckpunkts
 			LinienSegment m11 = new LinienSegment(mstEdge.endpkt1, p1[0]);
 			LinienSegment m22 = new LinienSegment(mstEdge.endpkt1, p1[1]);
+			
 			LinienSegment m21 = new LinienSegment(mstEdge.endpkt2, p2[0]);
 			LinienSegment m12 = new LinienSegment(mstEdge.endpkt2, p2[1]);
 			
@@ -136,7 +152,7 @@ public class ClusterMerge {
 			else if (c2 == null && c1 ==null){
 				System.out.println("F");
 			}
-				
+		}		
 			return false;
 		}
 		
@@ -154,6 +170,7 @@ public class ClusterMerge {
 		}
 		
 		private void TspCombine(int i, int j, ArrayList<double[][]> tsp, List<List<Punkt>> clusters, LinienSegment bestEdge, LinienSegment mst) {
+			// TODO test
 			int a=-1,b=-1,c=-1,d=-1;
 			
 			int iSize = clusters.get(i).size();
@@ -166,8 +183,11 @@ public class ClusterMerge {
 			
 			//neue Adj Matrix, die die beiden Touren verbindet. Zuerst aufstellen.
 			int size=  iSize+jSize;
-			//erstelle neue Adj Matrix
 			double[][] combined = new double[size][size];
+			
+			
+		//	Arrays.fill(combined, 0);
+
 			
 			for (int h =0; h < iSize ;h++) {
 				for (int g =0; g < iSize ;g++) {
@@ -175,8 +195,10 @@ public class ClusterMerge {
 				}
 			}
 			
+			
+			System.out.println(combined.length);
 			int x=0;int y=0;
-			for (int h = iSize; h < iSize+jSize ;h++, x++) {
+			for (int h = iSize; h < iSize+jSize ;h++, x++) { //wenn index fehler, i+j-1!
 				for (int g =iSize; g < iSize+jSize ;g++, y++) {
 					combined[h][g] = tsp.get(j)[x][y]; 
 					if( g == iSize+jSize -1) {
@@ -191,23 +213,28 @@ public class ClusterMerge {
 			//1. mst eckpkte verbinden.
 			combined[a][b+iSize] = 1;
 			combined[b+iSize][a] = 1;
-			//2.mst vom jeweiligen bestedge eckpkt lÃ¶sen
+			
+			//2.mst vom jeweiligen bestedge eckpkt lösen
 			combined[a][c] = 0;
 			combined[c][a] = 0;
+			
 			combined[b+iSize][d+iSize] = 0;
 			combined[d+iSize][b+iSize] = 0;
+			
 			//bestedge verbinden
 			combined[c][d+iSize] = 1;
 			combined[d+iSize][c] = 1;
 			
-			//alte beiden Touren lÃ¶schen.
 			tsp.remove(i);
+		
 			if( i < j ) {
 				tsp.remove(j-1);
 			}
 			else tsp.remove(j);
-
+			
+			
 			tsp.add(combined);
+
 		}
 		
 		private Punkt[] zweiNachbarn(int i, int a, ArrayList<double[][]> tsp, List<List<Punkt>> clusters, Punkt mstP) {
@@ -246,19 +273,22 @@ public class ClusterMerge {
 
 			LinienSegment m11 = new LinienSegment(mst.endpkt1, p1[0]);
 			LinienSegment m22 = new LinienSegment(mst.endpkt1, p1[1]);
+			
 			LinienSegment m21 = new LinienSegment(mst.endpkt2, p2[0]);
 			LinienSegment m12 = new LinienSegment(mst.endpkt2, p2[1]);
 
 			// in i und j die 2 endpkte finden tsp.get(i)
+			//TODO test if richtigen Segmente
 			LinienSegment c11 = new LinienSegment(p1[0], p2[0]);
 			LinienSegment c12 = new LinienSegment(p1[0], p2[1]);
+			
 			LinienSegment c21 = new LinienSegment(p1[1], p2[0]);
 			LinienSegment c22 = new LinienSegment(p1[1], p2[1]);
 			
 			LinienSegment c[] = {null, null};
 			boolean c0 =false ,c1 = false;
 			
-			//checkt die 4 Kandidaten auf Schnitte
+			
 			 if( kreuzungsfreiBool(c11, mst) == true && kreuzungsfreiBool(c11, m22) == true && kreuzungsfreiBool(c11, m12) == true) {
 						 c[0]= c11;
 						 c0=true;
@@ -268,12 +298,13 @@ public class ClusterMerge {
 				 if( c0 ==false) {
 					 c[0]= c12;
 				 }
-				 else { //wenn beide gÃ¼ltig dann nimm die kÃ¼rzere
+				 else { //wenn beide gültig dann nimm die kürzere
 					 if( c11.gewicht < c12.gewicht) {
-						 c[0]= c11;
+						 c[0]= c12;
+						 System.out.println("saved");		//change back ti 11 oben 12 unten!!! TODO
 					 }
 					 else {
-						 c[0]= c12;
+						 c[0]= c11;
 					 }
 				 }
 			 }
@@ -287,15 +318,20 @@ public class ClusterMerge {
 				 if( c1 ==false) {
 					 c[1]= c22;
 				 }
-				 else { //wenn beide gÃ¼ltig dann nimm die kÃ¼rzere
+				 else { //wenn beide gültig dann nimm die kürzere
 					 if( c21.gewicht < c22.gewicht) {
-						 c[1]= c21;
+						 c[1]= c22;
+						 System.out.println("saved");
 					 }
 					 else {
-						 c[1]= c22;
+						 c[1]= c21;
 					 }
 				 }
 			 }
+//			 else {
+//				 System.out.println("both crossing mst. or worse  c1 :/");
+//			 }
+	 
 
 			return c;
 		}
@@ -317,7 +353,7 @@ public class ClusterMerge {
 			u = (u1-u2)/(nenner1 - nenner2);
 
 			
-			if (u < 1.0 && u > 0.0 && t < 1.0 && t > 0.0) return false;
+			if (u < 1.0 && u > 0.0 && t < 1.0 && t > 0.0) return false;	//<= gibt false auch wenn in einem endpkt schneiden </> mit =?
 			
 			return true;
 			
@@ -351,11 +387,14 @@ public class ClusterMerge {
 		}
 		
 		private void setupAdjMatrix(List<Punkt> cluster, LinkedList<Punkt> tsp) {
-			//wandelt linkedList in adj Matrix um.
+
+			
+			
 			int m = cluster.size();
 			double[][] AdjMatrix = new double[m][m];
 			int a = 100,b = 100;
 			
+			//fill with 0. Array fill doesnt work
 			for (int h =0; h < m ;h++) {
 				for (int g =0; g < m ;g++) {
 					AdjMatrix[h][g] = 0; 
@@ -394,21 +433,26 @@ public class ClusterMerge {
 			tspLinked.add(AdjMatrix);
 		}
 		
-	
-		//der Rest ist nur zur Ausgabe der Touren!
+		
+		
 		
 		public void printTour(ArrayList<double[][]> tsp, List<List<Punkt>> clusters) {
 			int[][] indexTour = new int[tsp.size()][2];
+			
 			indexTour= createIndexTour(tsp.get(0));
 			ValidTourCheck(indexTour, clusters.get(0));
-			System.out.println(FinalTsp.get(0).TourLaenge(FinalTsp));
+			System.out.println("finale Tourlänge: "+FinalTsp.get(0).TourLaenge(FinalTsp));
+			size = FinalTsp.get(0).TourLaenge(FinalTsp);
 		}
 		
+
+		
 		private int[][] createIndexTour(double[][] tsp) {
-			//genaueres zu IndexTour sehe perfectTsp
 			int[][] indexTour = new int[tsp.length][2];
+
 			for (int h =0; h < FinalTsp.size() ;h++) {
 				for (int g =h+1; g < FinalTsp.size() ;g++) {
+					
 					if(tsp[h][g] == 1) {
 						for(int z = 0 ;z< FinalTsp.size(); z++) {
 							if(indexTour[z][0] == 0 && indexTour[z][1] == 0) {
@@ -418,6 +462,7 @@ public class ClusterMerge {
 							}
 						}
 					}
+					
 				}
 			}
 			return indexTour;
@@ -435,7 +480,9 @@ public class ClusterMerge {
 			int current = indexTour[0][1];
 			visited[0] =true;
 			boolean found;
+			
 			cluster.get(indexTour[0][1]).printPunkt();
+			traverse.add(cluster.get(indexTour[0][1]));
 			
 			for(int i=1; i< m; i++) {	
 				found = false;
@@ -444,9 +491,11 @@ public class ClusterMerge {
 					if( visited[j] == false) {
 						
 						if( indexTour[j][0] == current) {
+							
 							visited[j] = true;
 							current = indexTour[j][1];
 							cluster.get(indexTour[j][1]).printPunkt();
+							traverse.add(cluster.get(indexTour[j][1]));
 							found = true;
 							break;
 						}
@@ -454,6 +503,7 @@ public class ClusterMerge {
 							visited[j] = true;
 							current = indexTour[j][0];
 							cluster.get(indexTour[j][0]).printPunkt();
+							traverse.add(cluster.get(indexTour[j][0]));
 							found = true;
 							break;
 						}

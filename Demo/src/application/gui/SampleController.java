@@ -2,12 +2,15 @@
  
  import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -27,8 +30,11 @@ import application.graphmodel.Punkt;
 import application.graphmodel.TspFinder;
 import application.graphmodel.clusterCentroid;
 import application.graphmodel.perfectTspNaiv;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -36,6 +42,8 @@ import javafx.scene.Group;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -58,6 +66,8 @@ public class SampleController {
 	@FXML
 	Pane world;
 	ObservableList<String> choiceBoxAlgo = FXCollections.observableArrayList("K++ means", "random k means");
+	ObservableList<String> choiceBoxTsp = FXCollections.observableArrayList("optimale Tsp", "MST-Heuristik Tsp");
+	ObservableList<String> choiceBoxKanten = FXCollections.observableArrayList("Delaunay Kanten", "vollst. Graph");
 	
 	Builder graphs;
 	Group lines = new Group();
@@ -69,27 +79,40 @@ public class SampleController {
 	Group globalMst = new Group();
 	Group tspEdges = new Group();
 	Group finalTsp = new Group();
+	Group higherOrderEdges = new Group();
 	public int test = 10;
+	boolean tourmod = false;
+	boolean kantenmod = false;
+	ArrayList<double[][]> globalTspPerfect = new ArrayList<double[][]>();
+	List<LinkedList<Punkt>> globalTspMst = new ArrayList<LinkedList<Punkt>>();
+	ArrayList<LinienSegment> globalerMst = new ArrayList<LinienSegment>();
 	List<List<Point>> globalCluster = new ArrayList<List<Point>>();
+	ArrayList <Punkt> trav = new ArrayList<Punkt>();
+	double toursize;
 	@FXML
 	public void initialize() {																	//initialisiert Das Feld
 		
 		
 		world.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
 		world.getChildren().clear();															//löscht vorher eventuell vorhandene Punktmenge
-		//world.setScaleX(1000);
-		//world.setScaleY(1000);
 		delEdges.setScaleX(1);
 		delEdges.setScaleX(1);
 		graphs = new Builder(world, 0);
-		choicebox.setValue("Clustering:");
+		choicebox.setValue("Clustering Algorithmus:");
 		choicebox.setItems(choiceBoxAlgo);
-		//clustering();
+		cbtsp.setValue("Cluster-Tsp Algorithmus:");
+		cbtsp.setItems(choiceBoxTsp);
+		kanten.setValue("Kantenbasis: ");
+		kanten.setItems(choiceBoxKanten);
+		
+		
 	}
 	
 	
 	@FXML
-	public void generate() { 																	//generiert punkte zuffällig, 
+	public void generate() { 
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
 		world.getChildren().clear();
 		lines.getChildren().clear();
 		points.getChildren().clear();
@@ -103,23 +126,14 @@ public class SampleController {
 		world.getChildren().add(points);
 		graphs.draw();
 		
-		if(choicebox.getValue() == "K++ means") {
-			
-			test = 500;
-			System.out.println(test);
-			
-		}
 		
-		else if(choicebox.getValue() == "random k means") {
-			
-			test = 2;
-			System.out.println(test);
-		}
 	}
 	
 	@FXML
 	public void kOrderTest() {
-		
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
+		boolean testing = false;
 		ArrayList<Punkt> punkte = new ArrayList<Punkt>();
 		
 		for (Point p : graphs.punkte) { 
@@ -137,14 +151,9 @@ public class SampleController {
 			pnkts.add(pt);
 		}
 		
-		for(Pnkt p : pnkts) {
-			
-			System.out.println(p.getN());
-		}
-		
+	
 		ArrayList<LinienSegment> finalTour = finalAlgo();
 		for (LinienSegment l : finalTour) {
-			System.out.println("checkpoint loop");
 
 
 			Pnkt p1 = new Pnkt(l.getEndpkt1().getX(),l.getEndpkt1().getY(),l.getEndpkt1().getLabel());
@@ -161,30 +170,47 @@ public class SampleController {
 							int order1 = Pnkt.delaunayOrd(pnkts, p.getN(), q.getN());
 							if(order1 >= 1) {
 								
-								System.out.println("higher order Kantee!!!!!!!!!!!!!!!!!");
+								testing = true;
+								System.out.println("higher Order Kante:"+" ["+l.getEndpkt1().getX()+", "+l.getEndpkt1().getY()+"] "+ "["+l.getEndpkt2().getX()+", "+l.getEndpkt2().getY()+"]"+" | Ordnung: "+order1);
+								Line lin = new Line(l.getEndpkt1().getX(),l.getEndpkt1().getY(), l.getEndpkt2().getX(), l.getEndpkt2().getY());
+								higherOrderEdges.getChildren().add(lin);
 						}
 						
 					} 
 				}
+			
 			}
-			//int order = Pnkt.delaunayOrd(pnkts, p1.getN(), p2.getN());
-			//int order = Pnkt.delaunayOrd(pnkts, test1.getN(), test2.getN());
-		//	if(order >= 1) {
-				
-			//	System.out.println("higher order Kantee!!!!!!!!!!!!!!!!!");
+
 			}
 			
 		}
+		if (testing == false) {System.out.println("Keine Higher Order Kanten genutzt.");}
+		world.getChildren().add(higherOrderEdges);
 	}
 	
 	@FXML
 	public ArrayList<LinienSegment> finalAlgo() {
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
+		trav.clear();
+		world.getChildren().remove(globalMst);
+		globalMst.getChildren().clear();
 		world.getChildren().remove(tspEdges);
 		tspEdges.getChildren().clear();
 		world.getChildren().remove(finalTsp);
 		finalTsp.getChildren().clear();
-		ArrayList<LinienSegment> mst = mstGlobal();
-		ArrayList<double[][]> tsps = tsp_perfect();
+		ArrayList<LinienSegment> mst = new ArrayList<LinienSegment>();
+		if(!globalerMst.isEmpty()) {
+			
+			mst = globalerMst;
+		}
+		
+		else if(globalerMst.isEmpty()) {
+			
+			mst = mstGlobal();
+		}
+		
+		//ArrayList<double[][]> tsps = tsp_perfect();
 		List<List<Point>> cl = globalCluster;
 		List<List<Punkt>> clusters = new ArrayList<List<Punkt>>();
 		
@@ -210,8 +236,24 @@ public class SampleController {
 		
 		ClusterMerge finalStep = new ClusterMerge();
 		
-		finalStep.execute(clusters, mst, tsps);
+		if (tourmod == false) {
+			if(!globalTspPerfect.isEmpty()) {
+				finalStep.execute(clusters, mst, globalTspPerfect);
+			}
+		}
 		
+		else if(tourmod == true) {
+			if(!globalTspMst.isEmpty()) {
+				finalStep.execute(clusters, mst, globalTspMst);
+				
+			}
+			
+		}
+		
+		
+		
+		trav = finalStep.traverse;
+		toursize = finalStep.size;
 		for (LinienSegment line : finalStep.getTsp()) {
 			
 			Line l = new Line(line.getEndpkt1().getX(), line.getEndpkt1().getY(), line.getEndpkt2().getX(), line.getEndpkt2().getY());
@@ -225,40 +267,63 @@ public class SampleController {
 	
 	@FXML
 	public ArrayList<LinienSegment> mstGlobal() {
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
 		world.getChildren().remove(mstEdges);
 		world.getChildren().remove(delEdges);
 		world.getChildren().remove(globalMst);
+		world.getChildren().remove(tspEdges);
 
 		delEdges.getChildren().clear();
 		mstEdges.getChildren().clear();
 		globalMst.getChildren().clear();
-		ArrayList<Punkt> punkte = new ArrayList<Punkt>();
-		
-		for (Point p : graphs.punkte) { 
+		tspEdges.getChildren().clear();
+		if (!globalerMst.isEmpty()) {
+			for(LinienSegment l : globalerMst) {
+				
+				Punkt x = l.getEndpkt1();
+				Punkt y = l.getEndpkt2();
 			
+				Line g = new Line(x.getX(),x.getY(), y.getX(), y.getY());
+				g.setStroke(Color.RED);
+				globalMst.getChildren().add(g);
+				
+			}
 			
-			Punkt t = new Punkt(p.getX(), p.getY());
-			punkte.add(t);
-		}
-		
-		Mst_all tester = new Mst_all();
-		
-		tester.execute(punkte);
-		ArrayList <LinienSegment> mstGlobals = tester.getFinalKanten();
-		
-		for (LinienSegment l : mstGlobals) {
-			
-			Punkt x = l.getEndpkt1();
-			Punkt y = l.getEndpkt2();
-			
-			Line g = new Line(x.getX(),x.getY(), y.getX(), y.getY());
-			g.setStroke(Color.RED);
-			globalMst.getChildren().add(g);
+			world.getChildren().add(globalMst);
+			return globalerMst;
 			
 		}
 		
-		world.getChildren().add(globalMst);
-		return mstGlobals;
+		else {
+			ArrayList<Punkt> punkte = new ArrayList<Punkt>();
+		
+			for (Point p : graphs.punkte) { 
+			
+			
+				Punkt t = new Punkt(p.getX(), p.getY());
+				punkte.add(t);
+			}
+			
+			Mst_all tester = new Mst_all();
+		
+			tester.execute(punkte);
+			ArrayList <LinienSegment> mstGlobals = tester.getFinalKanten();
+			globalerMst = mstGlobals;
+			for (LinienSegment l : mstGlobals) {
+			
+				Punkt x = l.getEndpkt1();
+				Punkt y = l.getEndpkt2();
+			
+				Line g = new Line(x.getX(),x.getY(), y.getX(), y.getY());
+				g.setStroke(Color.RED);
+				globalMst.getChildren().add(g);
+			
+			}
+		
+			world.getChildren().add(globalMst);
+			return mstGlobals;
+		}
 	}
 	
 	
@@ -290,10 +355,61 @@ public class SampleController {
 		else {return;}
 	}
 	
+	@FXML public void speichern() {
+		
+		try {
+		      File saveTour = new File("Sample "+graphs.punkte.size());
+		      if (saveTour.createNewFile()) {
+		        System.out.println("File created: " + saveTour.getName() + " in " + saveTour.getAbsolutePath());
+		      } else {
+		        System.out.println("File already exists.");
+		      }
+		    } catch (IOException e) {
+		      System.out.println("An error occurred.");
+		      e.printStackTrace();
+		    }
+		
+	 try {
+	  	        FileWriter myWriter = new FileWriter("Sample "+graphs.punkte.size());
+	  	       
+	  	        	if (!trav.isEmpty()) {
+	  	       
+	  	        		for (int i = 0; i<trav.size(); i++) {
+	  	        			
+	  	        			double x = trav.get(i).getX();
+	  	        			double y = trav.get(i).getY();
+
+	  	        			myWriter.write((i+1)+" "+x+" "+y+"\n");
+	  	        			
+	  	        		}
+	  	        		
+	  	        		myWriter.write("\n \n \n \n");
+	  	        		myWriter.write("Tourl�nge: "+toursize);
+	  	        		
+	  	        	}
+	  	        
+	  	        myWriter.close();
+	  	        System.out.println("Successfully wrote to the file.");
+	  	        
+	  	        
+	 		} catch (IOException e) {
+	 			System.out.println("An error occurred.");
+	 			e.printStackTrace();
+	 			}
+		
+	
+	}
+	
 	@FXML
 	public List<List<LinienSegment>> mst() {
+		
+
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
 		world.getChildren().remove(mstEdges);
 		world.getChildren().remove(delEdges);
+		world.getChildren().remove(globalMst);
+		globalMst.getChildren().clear();
 		delEdges.getChildren().clear();
 		mstEdges.getChildren().clear();
 		List<List<Point>> clusters = globalCluster;
@@ -390,16 +506,27 @@ public class SampleController {
 		}
 		world.getChildren().add(mstEdges);
 		return mstKanten;
+		
+		
+		
 	}
 				
-	
+
 	@FXML 
 	private ChoiceBox choicebox;
+	
+	@FXML
+	private ChoiceBox cbtsp;
+	
+	@FXML 
+	private ChoiceBox kanten;
 
 	
 	
 	@FXML
 	public void load() {
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
 		graphs.punkte.clear();
 		FileChooser fileChooser = new FileChooser();
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
@@ -450,10 +577,10 @@ public class SampleController {
 				}
 				
 				scanner.close();
-				double xMax = 0;
-				double yMax = 0;
+			//	double xMax = 0;
+			//	double yMax = 0;
 				
-				while (xMax > 2000 || yMax > 2000 || xMax < 800 || yMax < 800) {
+			/**	while (xMax > 2000 || yMax > 2000 || xMax < 800 || yMax < 800) {
 					xMax = 0;
 					yMax = 0;
 					for (int i =0; i<graphs.punkte.size();i++) {
@@ -483,6 +610,7 @@ public class SampleController {
 					Circle c = graphs.punkte.get(i).getC();
 					points.getChildren().add(c);
 				}
+				**/
 				world.getChildren().addAll(points);
 				graphs.draw();
 				
@@ -490,7 +618,7 @@ public class SampleController {
 			catch (FileNotFoundException e) {
 				
 				e.printStackTrace();
-				System.out.println("Datei nicht gefunden oder Koordinaten ungültig.");
+				System.out.println("Datei nicht gefunden oder Koordinaten ung�ltig.");
 			}
 			
 		}
@@ -507,7 +635,8 @@ public class SampleController {
 			graphs.punkte.add(p);
 			graphs.draw();
 			System.out.println(p.getX() +", "+ p.getY());
-			
+			globalerMst.clear();
+			trav.clear();
 		}
 
 		
@@ -516,8 +645,9 @@ public class SampleController {
 	
 		     
 	@FXML
-	public void clear() {																		//Alle Punkte löschen, liste leeren
-		
+	public void clear() {	//Alle Punkte löschen, liste leeren
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
 		world.getChildren().clear();
 		lines.getChildren().clear();
 		ccenters.getChildren().clear();
@@ -531,6 +661,10 @@ public class SampleController {
 	@FXML
 	public List<LinkedList<Punkt>> tsp_mst() {
 		
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
+		world.getChildren().remove(globalMst);
+		globalMst.getChildren().clear();
 		world.getChildren().remove(tspEdges);
 		world.getChildren().remove(mstEdges);
 		mstEdges.getChildren().clear();
@@ -585,7 +719,7 @@ public class SampleController {
 					
 					
 				}
-				System.out.println(mstKanten);									//nur zum debugging, kann weg
+				//System.out.println(mstKanten);									//nur zum debugging, kann weg
 		}
 		
 		world.getChildren().add(tspEdges);
@@ -596,6 +730,21 @@ public class SampleController {
 	@FXML
 	public ArrayList<double[][]> tsp_perfect() {
 		
+		
+		if (kanten.getValue() == "Delaunay Kanten") {
+			
+			kantenmod = false;
+		}
+		
+		else if (kanten.getValue() == "vollst. Graph") {
+			
+			kantenmod = true;
+		}
+		
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
+		world.getChildren().remove(globalMst);
+		globalMst.getChildren().clear();
 		world.getChildren().remove(tspEdges);
 		world.getChildren().remove(mstEdges);
 		mstEdges.getChildren().clear();
@@ -619,9 +768,26 @@ public class SampleController {
 		
 			cl.add(cls);
 		}
+		List<List<LinienSegment>> delK = new ArrayList<List<LinienSegment>>();
+		if (kantenmod == false) {
+			
+			delK = triangulation();
+		}
 		
+		else if(kantenmod == true) {
+			
+			delK = new ArrayList<List<LinienSegment>>();
+			
+			for (List<Punkt> ps : cl) {
+				DelaunayNaiv2 dv = new DelaunayNaiv2();
+				dv.fullGraph(ps);
+				List<LinienSegment> edg = dv.finalEdges();
+				delK.add(edg);
+				
+			}
+			
+		}
 		
-		List<List<LinienSegment>> delK = triangulation();
 
 		delEdges.getChildren().clear();
 		for(int i = 0; i < cl.size();i++) {							//für jedes cluster einzelne tsp berechnung
@@ -647,191 +813,61 @@ public class SampleController {
 
 	
 	
+		public void clusterTsp() { 	
+			
+			
+			if (cbtsp.getValue() == "optimale Tsp") {
+				
+				tourmod = false;
+				globalTspPerfect = tsp_perfect();
+				
+				
+			}
+			
+			else if(cbtsp.getValue() == "MST-Heuristik Tsp") {
+				
+				tourmod = true;
+				globalTspMst = tsp_mst();
+				
+			}
+			
+		}
+		
+		
+		
 	
 	
 	
-		public List<List<Point>> clustering() {
+	
+	public List<List<Point>> clustering() {
+		
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
+		world.getChildren().remove(globalMst);
+		globalMst.getChildren().clear();
 		world.getChildren().remove(ccenters);
 		ccenters.getChildren().clear();
 		globalCluster = null;
 		boolean bed = false;
-		/*
-		// K-Means: sinnvoll, liefert sogar voronoi regionen. Frage: wie ist k zu wählen
-		int k = 4;
-		ArrayList<clusterCentroid> centers = new ArrayList<clusterCentroid>();
-		ArrayList<clusterCentroid> centersTemp = new ArrayList<clusterCentroid>();
-		List<List<Point>> clustersFinal = new ArrayList<List<Point>>();
-		boolean flag = true;
-		double maxX = 0;																			
-		double minX = graphs.punkte.get(0).getX();													
-		double maxY = 0;																			
-		double minY = graphs.punkte.get(0).getY();													
-																									
-		for (Point p : graphs.punkte) {																
-																									
-			if (maxX < p.getX() ) {maxX = p.getX();}
-			if (minX > p.getX() ) {minX = p.getX();}
-			if (maxY < p.getY() ) {maxY = p.getY();}
-			if (minY > p.getY() ) {minY = p.getY();}
-			
-		}																							// Initialisierung der Clusterzentren
+		int size = 8;
 		
-		for (int i = 0; i<k;i++) {	// Zuweisungen und k ändern 
-			
-			
-			if (k == 0) { //fürs erste, wenn random gewollt einfach Auskommentieren, ist eine gui erweiterung 
-				//möglich? als switch case?
-				
-				//der erste ist immer noch zufällig!
-			
-			List<Point> clusterList = new ArrayList<>();
-			clustersFinal.add(clusterList);
-			
-			double xCord = (Math.random() * (maxX-minX)) + minX;
-			double yCord = (Math.random() * (maxY-minY)) + minY;
-			
-			centers.add( new clusterCentroid(xCord, yCord));
-			}
-			
-			else {
-				double[] cord  = neuerCentroid(graphs.punkte, centers);
-				
-				centers.add(new clusterCentroid(cord[0], cord[1]));
-			}
-			
-		}
-
+		boolean first = true;
 		
-		do{
-		int trigger = 0;
-		clustersFinal.clear();
-		centersTemp.clear();
-		
-		for (int i = 0; i<k;i++) {
+		while (first == true) {
 			
-			List<Point> clusterList = new ArrayList<>();
-			clustersFinal.add(clusterList);
-		}
+			TextInputDialog tid = new TextInputDialog("");
+			tid.setTitle("Clustergr��e w�hlen");
+			tid.setContentText("Wie gro� sollen die Cluster maximal sein?: (<=10 empfohlen)");
+			Optional<String> result = tid.showAndWait();
+			result.ifPresent(name -> System.out.println("Clustegr��e: " + name));
+			String res = tid.getResult();
 			
-			for (Point p : graphs.punkte) {										//für alle punkte die minimale Distanz zum aktuellen Zentrum berechnen
+			size = Integer.parseInt(res);
 			
-				int cl = 0;
-				double minDist = centers.get(0).distance(p); 
-			
-				for (clusterCentroid c : centers) {
-				
-					double dist = c.distance(p);
-					if (dist < minDist) {
-					
-						cl = centers.indexOf(c);
-						minDist = dist;
-					}
-				}
-			
-			clustersFinal.get(cl).add(p);
-		}
-		for (clusterCentroid c : centers) {										// cluster zentren updaten
-			int index = centers.indexOf(c);
-			int count = 0;
-			double newX = 0;
-			double newY = 0;
-			double valueX = 0;
-			double valueY = 0;
-				
-			for (Point t : clustersFinal.get(index)) {
-				count += 1;
-				newX += t.getX();
-				newY += t.getY();
-			}
-				
-			valueX = Math.round(newX / count);
-			valueY = Math.round(newY / count);
-			
-			if (Math.round(c.getX()) == valueX && Math.round(c.getY()) == valueY) {		//abrruchbedingung (keine zentren-updates mehr)
-				
-				trigger +=1;
-			}
-			
-			c.setX(valueX);
-			c.setY(valueY);
-			
+			first = false;
 		}
 		
-		if (trigger == k) flag = false;
-			
-
-	}while(flag == true);
-		
-
-
-		    
-		        
-		    
-		   for (Point t : clustersFinal.get(0)) {
-			   
-			   t.c.setFill(Color.RED);
-			   
-			   Circle z = new Circle(10, Color.WHITE);
-			   z.setStroke(Color.RED);
-			   z.setTranslateX(centers.get(0).getX());
-			   z.setTranslateY(centers.get(0).getY());
-			   z.setOpacity(0.3);
-			   ccenters.getChildren().add(z);
-			   
-		   }
-		   
-		   for (Point t : clustersFinal.get(1)) {
-			   
-			   t.c.setFill(Color.GREEN);
-			   
-			   Circle z = new Circle(10, Color.WHITE);
-			   z.setStroke(Color.GREEN);
-			   z.setTranslateX(centers.get(1).getX());
-			   z.setTranslateY(centers.get(1).getY());
-			   z.setOpacity(0.3);
-			   ccenters.getChildren().add(z);
-		   }
-		   
-		   for (Point t : clustersFinal.get(2)) {
-			   
-			   t.c.setFill(Color.YELLOW);
-			   
-			   Circle z = new Circle(10, Color.WHITE);
-			   z.setStroke(Color.YELLOW);
-			   z.setTranslateX(centers.get(2).getX());
-			   z.setTranslateY(centers.get(2).getY());
-			   z.setOpacity(0.3);
-			   ccenters.getChildren().add(z);
-		   }
-		   
-		   for (Point t : clustersFinal.get(3)) {
-			   
-			   t.c.setFill(Color.PURPLE);
-			   
-			   Circle z = new Circle(10, Color.WHITE);
-			   z.setStroke(Color.PURPLE);
-			   z.setTranslateX(centers.get(3).getX());
-			   z.setTranslateY(centers.get(3).getY());
-			   z.setOpacity(0.3);
-			   ccenters.getChildren().add(z);
-		   }
-	
-			Iterator <List<Point>> iterator = clustersFinal.iterator();
-			
-			while (iterator.hasNext()) {
 				
-				List<Point> vgl = iterator.next();
-				if (iterator.next().isEmpty()) {
-					iterator.remove();;
-				}
-				
-			}
-		   
-		//	if(clustersFinal.get(0).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(0));}
-		//	if(clustersFinal.get(1).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(1));}
-		//	if(clustersFinal.get(2).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(2));}
-		//	if(clustersFinal.get(3).isEmpty()==true) {clustersFinal.remove(clustersFinal.get(3));}
-		*/
 		if(choicebox.getValue() == "K++ means") {
 			
 			bed = true;
@@ -845,45 +881,23 @@ public class SampleController {
 			
 		}
 		
-		ClusteringRandomKmeans cl = new ClusteringRandomKmeans(graphs.punkte, bed);
+		ClusteringRandomKmeans cl = new ClusteringRandomKmeans(graphs.punkte, bed, size);
 		cl.execute();
+		
+		
 		globalCluster = cl.getClusters();
-		  // world.getChildren().addAll(ccenters);
-			
-		   return globalCluster;
-		} 
+		return globalCluster;
+} 
 	
-	//used for k-means++ finden vom 2+-ten Cluster, Wahrscheinlichkeitsbasiert.
-	private double[] neuerCentroid(ArrayList<Point> punkte, ArrayList<clusterCentroid> centers) {
-		double[] cord = {0,0};
-		double minDist = 10000;
-		ArrayList<Double> DistArray = new ArrayList<Double>();
-		ArrayList<Double> DuplikatedDist = new ArrayList<Double>();
-		
-		for(int i=0; i< punkte.size(); i++) {
-			for(int k=0; k< centers.size(); k++) {
-				double temp = Math.pow(centers.get(k).distance(punkte.get(i)), 2);
-				if(temp < minDist) minDist=temp; 
-			}
-			DistArray.add(minDist);
-			
-			double repeat = DistArray.get(i)/50.0;	//D^2 für alle 50 Einheiten einmal einfügen
-			for(int k=0; k < repeat ; k++) {			//auf größe anpassen!!!!!
-				DuplikatedDist.add(DistArray.get(i));
-			}
-		}
-		
-		Random rnd = new Random();
-		double r = DuplikatedDist.get(rnd.nextInt(DuplikatedDist.size()));
-		
-		cord[0]=punkte.get(DistArray.indexOf(r)).getX();
-		cord[1]=punkte.get(DistArray.indexOf(r)).getX();
-		
-		return cord;
-	}
+
 		
 	@FXML
 	public List<List<LinienSegment>> triangulation() {
+		
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
+		world.getChildren().remove(globalMst);
+		globalMst.getChildren().clear();
 		world.getChildren().remove(tspEdges);
 		world.getChildren().remove(mstEdges);
 		mstEdges.getChildren().clear();
@@ -928,6 +942,9 @@ public class SampleController {
 	
 	@FXML
 	public List<List<LinienSegment>> completeGraph() {
+		
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
 		world.getChildren().remove(tspEdges);
 		world.getChildren().remove(mstEdges);
 		mstEdges.getChildren().clear();
@@ -985,6 +1002,8 @@ public class SampleController {
 			lines.getChildren().clear();
 			delEdges.getChildren().clear();
 			edges.clear();
+			globalerMst.clear();
+			trav.clear();
 			
 	}
 
@@ -999,4 +1018,5 @@ public class SampleController {
 	
 	
 	
+
 

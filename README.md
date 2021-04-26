@@ -23,10 +23,10 @@ SETUP:
    auswählen.
    
 5. Run-Argumente: Per Rechtsklick auf die Main.java im Package application.gui unter "Run as" > "Run Configurations.." auswählen. Im öffnenden Fenster den Reiter   
-   "Arguments" auswählen und im Feld "VM-arguments" folgende Zeile einfügen und YOUR\PATH\lib durch den Speicherort von JavaFX aus Schritt 3 ersetzen: 
+   "Arguments" auswählen und im Feld "VM-arguments" folgende Zeile einfügen und YOUR\PATH\ durch den Speicherort von JavaFX aus Schritt 3 ersetzen: 
    
                                   --module-path "YOUR\PATH\lib" --add-modules javafx.controls,javafx.fxml
                                   
 
 
-HINWEIS: Das Programm ist modular gebaut und muss auch so ausgeführt werden. Für ein volles Durchspielen aller Optionen auf einer Punktmenge müssen Clustering-Algorithmus, tsp Heuristik und Kantenbasis gewählt werden. Bei jeder neuen Punktmenge muss zuerst ein CLustering erzeugt werden. Vor den Tsp der Cluster muss einmal die Delaunay Triangulation erzeugt werden, und vor dem Merge Schritt "Final Algo" müssen die Tsp der Cluster generiert werden.
+HINWEIS: Das Programm ist modular gebaut und muss auch so ausgeführt werden. Für ein volles Durchspielen aller Optionen auf einer Punktmenge müssen Clustering-Algorithmus, tsp Heuristik und Kantenbasis gewählt werden. Bei jeder neuen Punktmenge muss zuerst ein CLustering erzeugt werden. Vor den Tsp der Cluster muss einmal die Delaunay Triangulation erzeugt werden, und vor dem Merge Schritt "Final Algo" müssen die Tsp der Cluster generiert werden. Danach kann beliebig zwischen den verschiedenen Anzeigen umhergesprungen werden!

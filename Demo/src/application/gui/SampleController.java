@@ -65,7 +65,7 @@ public class SampleController {
 	
 	@FXML
 	Pane world;
-	ObservableList<String> choiceBoxAlgo = FXCollections.observableArrayList("K++ means", "random k means");
+	ObservableList<String> choiceBoxAlgo = FXCollections.observableArrayList("K means++", "random k means");
 	ObservableList<String> choiceBoxTsp = FXCollections.observableArrayList("optimale Tsp", "MST-Heuristik Tsp");
 	ObservableList<String> choiceBoxKanten = FXCollections.observableArrayList("Delaunay Kanten", "vollst. Graph");
 	
@@ -83,6 +83,7 @@ public class SampleController {
 	public int test = 10;
 	boolean tourmod = false;
 	boolean kantenmod = false;
+	 ArrayList<LinienSegment> finalTour = new ArrayList<LinienSegment>();
 	ArrayList<double[][]> globalTspPerfect = new ArrayList<double[][]>();
 	List<LinkedList<Punkt>> globalTspMst = new ArrayList<LinkedList<Punkt>>();
 	ArrayList<LinienSegment> globalerMst = new ArrayList<LinienSegment>();
@@ -95,8 +96,8 @@ public class SampleController {
 		
 		world.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
 		world.getChildren().clear();															//löscht vorher eventuell vorhandene Punktmenge
-		delEdges.setScaleX(1);
-		delEdges.setScaleX(1);
+		//delEdges.setScaleX(1);
+		//delEdges.setScaleX(1);
 		graphs = new Builder(world, 0);
 		choicebox.setValue("Clustering Algorithmus:");
 		choicebox.setItems(choiceBoxAlgo);
@@ -118,7 +119,7 @@ public class SampleController {
 		points.getChildren().clear();
 		delEdges.getChildren().clear();
 		graphs.punkte.clear(); 																	//löscht vorher eventuell vorhandene Punktmenge
-		graphs = new Builder(world, 10);
+		graphs = new Builder(world, 40);
 		for (int i=0; i< graphs.punkte.size(); i++) {
 			Circle c = graphs.punkte.get(i).getC();
 			points.getChildren().add(c);
@@ -152,8 +153,8 @@ public class SampleController {
 		}
 		
 	
-		ArrayList<LinienSegment> finalTour = finalAlgo();
-		for (LinienSegment l : finalTour) {
+		ArrayList<LinienSegment> finT = finalTour;
+		for (LinienSegment l : finT) {
 
 
 			Pnkt p1 = new Pnkt(l.getEndpkt1().getX(),l.getEndpkt1().getY(),l.getEndpkt1().getLabel());
@@ -173,6 +174,7 @@ public class SampleController {
 								testing = true;
 								System.out.println("higher Order Kante:"+" ["+l.getEndpkt1().getX()+", "+l.getEndpkt1().getY()+"] "+ "["+l.getEndpkt2().getX()+", "+l.getEndpkt2().getY()+"]"+" | Ordnung: "+order1);
 								Line lin = new Line(l.getEndpkt1().getX(),l.getEndpkt1().getY(), l.getEndpkt2().getX(), l.getEndpkt2().getY());
+								lin.setStroke(Color.RED);
 								higherOrderEdges.getChildren().add(lin);
 						}
 						
@@ -262,6 +264,7 @@ public class SampleController {
 		}
 		
 		world.getChildren().add(finalTsp);
+		finalTour = finalStep.getTsp();
 		return finalStep.getTsp();
 	}
 	
@@ -348,7 +351,7 @@ public class SampleController {
 			tspEdges.getChildren().clear();
 			finalTsp.getChildren().clear();
 			delEdges.getChildren().clear();
-			graphs.draw();
+			//graphs.draw();
 		}
 		
 		
@@ -577,10 +580,10 @@ public class SampleController {
 				}
 				
 				scanner.close();
-			//	double xMax = 0;
-			//	double yMax = 0;
-				
-			/**	while (xMax > 2000 || yMax > 2000 || xMax < 800 || yMax < 800) {
+		//		double xMax = 0;
+		//		double yMax = 0;
+		/**		
+				while (xMax > 2000 || yMax > 2000 || xMax < 800 || yMax < 800) {
 					xMax = 0;
 					yMax = 0;
 					for (int i =0; i<graphs.punkte.size();i++) {
@@ -610,7 +613,7 @@ public class SampleController {
 					Circle c = graphs.punkte.get(i).getC();
 					points.getChildren().add(c);
 				}
-				**/
+		**/		
 				world.getChildren().addAll(points);
 				graphs.draw();
 				
@@ -654,6 +657,31 @@ public class SampleController {
 		graphs.punkte.clear();
 		delEdges.getChildren().clear();
 		globalMst.getChildren().clear();
+		finalTour.clear();
+		lines.getChildren().clear();
+		delEdges.getChildren().clear();
+		edges.clear();
+		globalerMst.clear();
+		trav.clear();
+		finalTour.clear();
+		globalTspPerfect.clear();
+		globalTspMst.clear();
+		globalerMst.clear();
+		globalCluster.clear();
+		trav.clear();
+		world.getChildren().remove(higherOrderEdges);
+		higherOrderEdges.getChildren().clear();
+		lines.getChildren().clear();
+		world.getChildren().remove(lines);
+		ccenters.getChildren().clear();
+		world.getChildren().remove(ccenters);
+		delEdges.getChildren().clear();
+		world.getChildren().remove(delEdges);
+		globalMst.getChildren().clear();
+		world.getChildren().remove(globalMst);
+		finalTour.clear();
+		finalTsp.getChildren().clear();
+		world.getChildren().remove(finalTsp);
 
 	}
 	
@@ -868,7 +896,7 @@ public class SampleController {
 		}
 		
 				
-		if(choicebox.getValue() == "K++ means") {
+		if(choicebox.getValue() == "K means++") {
 			
 			bed = true;
 			
@@ -1004,6 +1032,26 @@ public class SampleController {
 			edges.clear();
 			globalerMst.clear();
 			trav.clear();
+			finalTour.clear();
+			globalTspPerfect.clear();
+			globalTspMst.clear();
+			globalerMst.clear();
+			globalCluster.clear();
+			trav.clear();
+			world.getChildren().remove(higherOrderEdges);
+			higherOrderEdges.getChildren().clear();
+			lines.getChildren().clear();
+			world.getChildren().remove(lines);
+			ccenters.getChildren().clear();
+			world.getChildren().remove(ccenters);
+			delEdges.getChildren().clear();
+			world.getChildren().remove(delEdges);
+			globalMst.getChildren().clear();
+			world.getChildren().remove(globalMst);
+			finalTour.clear();
+			finalTsp.getChildren().clear();
+			world.getChildren().remove(finalTsp);
+
 			
 	}
 

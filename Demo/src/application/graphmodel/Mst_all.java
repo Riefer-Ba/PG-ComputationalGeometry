@@ -22,7 +22,7 @@ ArrayList<LinienSegment> mstKanten = new ArrayList<LinienSegment>();
 		
 		Collections.sort(delKanten);
 		
-		
+		//System.out.println("fertig sortiert.");
 		for(Punkt x : p) {
 			
 			p.get(p.indexOf(x)).addReachable(x);

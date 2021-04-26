@@ -46,6 +46,7 @@ public class ClusterMerge {
 			}
 			
 			FinalTsp(tspLinked, clusters);
+			System.out.println("Tourlänge: "+FinalTsp.get(0).TourLaenge(FinalTsp));
 		}
 
 		//TODO test if i und j passt
